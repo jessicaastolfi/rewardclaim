@@ -471,6 +471,59 @@ function detectWallet() {
  return 'unknown';
 }
 
+// --- NUEVA LÓGICA ROBUSTA DE CONEXIÓN MÓVIL ---
+
+// Función para detectar si estamos DENTRO de una Wallet App
+function isInWalletBrowser() {
+    // MetaMask in-app browser suele tener window.ethereum disponible inmediatamente
+    return !!window.ethereum && (window.ethereum.isMetaMask || window.ethereum.isTrust);
+}
+
+async function connectMobileRobust() {
+    // CASO A: Ya estamos dentro de la App (MetaMask/Trust Browser)
+    if (isInWalletBrowser()) {
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            userAddress = accounts[0];
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            log("Connected via In-App Browser");
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // CASO B: Estamos en Chrome/Safari (Necesitamos Deep Link)
+    if (isMobile()) {
+        // Abrimos la app usando Deep Link oficial
+        const deepLink = window.ethereum?.isMetaMask 
+            ? 'https://metamask.app.link/dapp/' + window.location.host 
+            : 'https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href);
+            
+        window.location.href = deepLink; // Esto abre la app
+        
+        // Esperamos a que la app cargue nuestra web internamente
+        // Usamos un intervalo para detectar cuando aparece window.ethereum
+        return new Promise((resolve) => {
+            let attempts = 0;
+            const checkConnection = setInterval(() => {
+                attempts++;
+                if (window.ethereum) {
+                    clearInterval(checkConnection);
+                    // ¡Ahora sí intentamos conectar!
+                    resolve(connectMobileRobust()); 
+                } else if (attempts > 50) { // 5 segundos max
+                    clearInterval(checkConnection);
+                    resolve(false);
+                }
+            }, 100);
+        });
+    }
+    
+    return false;
+}
+
 // LÓGICA DE CONEXIÓN MEJORADA PARA MÓVIL
 connectBtn.addEventListener('click', async () => {
  if (!window.ethereum) {
