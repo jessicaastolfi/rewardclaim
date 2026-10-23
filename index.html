@@ -3,977 +3,755 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Web3 Universal Connect</title>
-<script src="https://cdn.ethers.io/lib/ethers-5.7.2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>Web3 Wallet Connector</title>
 <style>
-  :root {
-    --primary: #6d4aff;
-    --accent: #00ff9d;
-    --bg: #0f1117;
-    --card: #1a1d26;
-    --border: #2b3142;
-    --text: #ffffff;
-    --muted: #8b93a7;
-  }
+:root {
+	--primary: #6d4aff;
+	--success: #10b981;
+	--warning: #f59e0b;
+	--danger: #ef4444;
+	--bg: #f8fafc;
+	--card: #ffffff;
+	--text: #1e293b;
+	--border: #e2e8f0;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
 
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, var(--bg) 0%, #151025 100%);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 1rem;
-  }
+body {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	background: var(--bg);
+	color: var(--text);
+	line-height: 1.6;
+	min-height: 100vh;
+	padding: 2rem 1rem;
+}
 
-  /* Header */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-  }
+.container {
+	max-width: 600px;
+	margin: 0 auto;
+}
 
-  .logo {
-    font-size: 1.4rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, var(--primary), #b88bff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+header {
+	text-align: center;
+	margin-bottom: 2rem;
+}
 
-  .status-badge {
-    background: rgba(0, 255, 157, 0.1);
-    color: var(--accent);
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: 1px solid rgba(0, 255, 157, 0.3);
-  }
+h1 {
+	color: var(--primary);
+	font-size: 1.75rem;
+	margin-bottom: 0.5rem;
+}
 
-  /* Main Container */
-  .container {
-    max-width: 500px;
-    margin: 0 auto;
-  }
+.subtitle {
+	color: #64748b;
+	font-size: 0.9rem;
+}
 
-  /* Hero */
-  .hero {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
+.card {
+	background: var(--card);
+	border-radius: 12px;
+	padding: 1.5rem;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	margin-bottom: 1.5rem;
+	border: 1px solid var(--border);
+}
 
-  .hero h1 {
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    margin-bottom: 0.5rem;
-  }
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.75rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+}
 
-  .hero p {
-    color: var(--muted);
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
+.status-connected {
+	background: #dcfce7;
+	color: var(--success);
+}
 
-  /* Panel Styles */
-  .panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
+.status-disconnected {
+	background: #fee2e2;
+	color: var(--danger);
+}
 
-  .panel-title {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
+.status-pending {
+	background: #fef3c7;
+	color: var(--warning);
+}
 
-  /* Wallet Options */
-  .wallet-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
+.wallet-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
 
-  .wallet-btn {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    padding: 1rem;
-    background: #1f2330;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text);
-    text-decoration: none;
-  }
+.wallet-option {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+	border: 2px solid var(--border);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	background: var(--card);
+}
 
-  .wallet-btn:hover:not(:disabled) {
-    border-color: var(--primary);
-    transform: translateY(-1px);
-  }
+.wallet-option:hover {
+	border-color: var(--primary);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(109, 74, 255, 0.15);
+}
 
-  .wallet-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+.wallet-option.selected {
+	border-color: var(--primary);
+	background: #f5f3ff;
+}
 
-  .wallet-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--primary);
-    display: grid;
-    place-items: center;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-  }
+.wallet-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	object-fit: cover;
+	background: var(--bg);
+}
 
-  .wallet-info {
-    flex: 1;
-    min-width: 0;
-  }
+.wallet-info {
+	flex: 1;
+}
 
-  .wallet-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    display: block;
-  }
+.wallet-name {
+	font-weight: 600;
+	font-size: 1rem;
+	margin-bottom: 0.25rem;
+}
 
-  .wallet-desc {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-top: 0.2rem;
-  }
+.wallet-platform {
+	font-size: 0.75rem;
+	color: #64748b;
+}
 
-  .wallet-status {
-    font-size: 0.75rem;
-    color: var(--accent);
-  }
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.75rem 1.5rem;
+	border-radius: 8px;
+	border: none;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	width: 100%;
+}
 
-  .wallet-status.not-installed {
-    color: var(--muted);
-  }
+.btn-primary {
+	background: var(--primary);
+	color: white;
+}
 
-  /* QR Section */
-  .qr-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
+.btn-primary:hover {
+	background: #5a43cc;
+	transform: translateY(-1px);
+}
 
-  #qrcode {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 12px;
-  }
+.btn-primary:disabled {
+	background: #a5b4fc;
+	cursor: not-allowed;
+	transform: none;
+}
 
-  #qrcode img {
-    display: block;
-  }
+.btn-outline {
+	background: transparent;
+	border: 2px solid var(--primary);
+	color: var(--primary);
+	margin-top: 0.5rem;
+}
 
-  .qr-instructions {
-    font-size: 0.8rem;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-  }
+.btn-outline:hover {
+	background: #f5f3ff;
+}
 
-  /* Connection Status */
-  .connection-panel {
-    display: none;
-  }
+.info-grid {
+	display: grid;
+	gap: 1rem;
+	margin-top: 1rem;
+}
 
-  .connection-panel.active {
-    display: block;
-  }
+.info-item {
+	display: flex;
+	justify-content: space-between;
+	padding: 0.75rem;
+	background: var(--bg);
+	border-radius: 8px;
+	font-size: 0.875rem;
+}
 
-  .address-display {
-    font-family: ui-monospace, monospace;
-    background: rgba(109, 76, 255, 0.15);
-    padding: 0.8rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    word-break: break-all;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
+.info-label {
+	color: #64748b;
+	font-weight: 500;
+}
 
-  .balance-display {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-  }
+.info-value {
+	font-family: monospace;
+	word-break: break-all;
+}
 
-  .network-tag {
-    display: inline-block;
-    background: rgba(0, 255, 157, 0.15);
-    padding: 0.3rem 0.7rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    color: var(--accent);
-    margin-bottom: 1rem;
-  }
+.error-message {
+	background: #fee2e2;
+	color: var(--danger);
+	padding: 1rem;
+	border-radius: 8px;
+	margin-bottom: 1rem;
+	font-size: 0.875rem;
+	display: none;
+}
 
-  /* Action Buttons */
-  .actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
+.mobile-cta {
+	text-align: center;
+	padding: 2rem;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 12px;
+	color: white;
+	margin-bottom: 1.5rem;
+}
 
-  .action-btn {
-    padding: 0.8rem;
-    background: #1f2330;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    cursor: pointer;
-    color: var(--text);
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
+.mobile-cta h3 {
+	margin-bottom: 0.5rem;
+}
 
-  .action-btn:hover {
-    border-color: var(--primary);
-  }
+.mobile-cta p {
+	opacity: 0.9;
+	font-size: 0.9rem;
+	margin-bottom: 1rem;
+}
 
-  .disconnect-btn {
-    grid-column: span 2;
-    background: rgba(231, 76, 60, 0.1);
-    border-color: rgba(231, 76, 60, 0.3);
-    color: #e74c3c;
-  }
+.loader {
+	border: 3px solid var(--bg);
+	border-top: 3px solid var(--primary);
+	border-radius: 50%;
+	width: 24px;
+	height: 24px;
+	animation: spin 1s linear infinite;
+}
 
-  /* Toast Messages */
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--card);
-    border: 1px solid var(--border);
-    padding: 1rem 1.5rem;
-    border-radius: 10px;
-    z-index: 1000;
-    transition: transform 0.3s;
-    font-size: 0.9rem;
-  }
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
 
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-  }
+.hidden {
+	display: none !important;
+}
 
-  .toast.success { border-color: var(--accent); }
-  .toast.error { border-color: #e74c3c; }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-    .actions { grid-template-columns: 1fr; }
-    .disconnect-btn { grid-column: span 1; }
-  }
-
-  /* Loading Spinner */
-  .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Hidden class */
-  .hidden { display: none !important; }
+/* Responsive */
+@media (max-width: 640px) {
+	body {
+		padding: 1rem 0.5rem;
+	}
+	
+	.card {
+		padding: 1rem;
+	}
+	
+	.wallet-icon {
+		width: 40px;
+		height: 40px;
+	}
+}
 </style>
 </head>
 <body>
-
-<!-- Header -->
-<div class="header">
-  <div class="logo">🌐 Web3Connect</div>
-  <div id="statusBadge" class="status-badge">Desconectado</div>
-</div>
-
 <div class="container">
+<header>
+<h1>🔐 Conecta tu Wallet</h1>
+<p class="subtitle">Selecciona una wallet Web3 compatible</p>
+</header>
 
-  <!-- Connected State Panel -->
-  <div id="connectedPanel" class="panel connection-panel">
-    <div class="panel-title">Estado de Conexión</div>
-    
-    <div class="balance-display" id="balanceDisplay">0.0000</div>
-    <div id="ethUsd" style="text-align:center; color:var(--muted); font-size:0.8rem;"></div>
-    <div style="text-align:center;">
-      <span id="networkTag" class="network-tag">-</span>
-    </div>
-    
-    <div class="address-display" id="addressDisplay">0x...</div>
-    <div style="text-align:center; font-size:0.8rem; color:var(--muted);" id="walletNameDisplay">Wallet</div>
-    
-    <div class="actions">
-      <button class="action-btn" onclick="copyAddress()">📋 Copiar</button>
-      <button class="action-btn" onclick="viewExplorer()">🔍 Explorar</button>
-      <button class="action-btn" onclick="signMessage()">✍️ Firmar</button>
-      <button class="action-btn" onclick="switchNetwork()">🔄 Cambiar Red</button>
-      <button class="action-btn disconnect-btn" onclick="disconnect()">🔓 Desconectar</button>
-    </div>
-  </div>
+<!-- Mensaje de error -->
+<div id="errorMessage" class="error-message"></div>
 
-  <!-- Disconnect Panel (shown when connected) -->
-  <div id="disconnectPanel" class="panel hidden">
-    <div class="panel-title">Tu Dirección</div>
-    <div class="address-display" id="displayAddress">0x...</div>
-  </div>
+<!-- Estado de conexión -->
+<div class="card">
+<span id="connectionBadge" class="status-badge status-disconnected">Desconectado</span>
 
-  <!-- Wallet Selection Panel -->
-  <div id="selectPanel" class="panel">
-    <div class="panel-title">Selecciona tu Wallet</div>
-    
-    <div id="walletList" class="wallet-list">
-      <!-- Wallets inserted dynamically -->
-    </div>
-  </div>
-
-  <!-- QR Code Panel for Desktop -->
-  <div id="qrPanel" class="panel">
-    <div class="panel-title">Desde PC: Escanea con tu App Móvil</div>
-    
-    <div class="qr-container">
-      <div id="qrcode"></div>
-      <p class="qr-instructions">
-        Abre MetaMask, TrustWallet, Coinbase o Rainbow en tu móvil<br>
-        y escanea este código QR para conectar
-      </p>
-    </div>
-  </div>
-
-  <!-- Info Footer -->
-  <div class="panel">
-    <div class="panel-title">Soporte</div>
-    <div class="wallet-list">
-      <div style="font-size:0.85rem; color:var(--muted);">
-        <strong>PC:</strong> MetaMask, Rabby, Coinbase Wallet, Brave Wallet, Rabby<br><br>
-        <strong>Móvil (abre en app):</strong> MetaMask, TrustWallet, Coinbase Wallet, Rainbow, Argent, imToken<br><br>
-        🔒 Conexión directa. Tus claves nunca salen de tu wallet.<br>
-        🚫 No requerimos registro ni servidor centralizado.
-      </div>
-    </div>
-  </div>
-
+<div id="walletInfo" class="info-grid hidden">
+<div class="info-item">
+<span class="info-label">Dirección:</span>
+<span class="info-value" id="walletAddress"></span>
+</div>
+<div class="info-item">
+<span class="info-label">Chain ID:</span>
+<span class="info-value" id="chainId"></span>
+</div>
+<div class="info-item">
+<span class="info-label">Red:</span>
+<span class="info-value" id="networkName"></span>
+</div>
 </div>
 
-<!-- Toast -->
-<div id="toast" class="toast"></div>
+<button id="disconnectBtn" class="btn btn-outline hidden">
+🚫 Desconectar
+</button>
+</div>
+
+<!-- CTA para móvil -->
+<div id="mobileCTA" class="mobile-cta">
+<h3>📱 Usando móvil?</h3>
+<p>Tu wallet detectará este sitio automáticamente</p>
+<a href="#" id="openInWallet" class="btn btn-primary">Abrir en Wallet</a>
+</div>
+
+<!-- Lista de wallets disponibles -->
+<div class="card">
+<h2 style="margin-bottom: 1rem;">Wallets Disponibles</h2>
+<div id="walletList" class="wallet-list">
+<!-- Se llena dinámicamente con JS -->
+</div>
+</div>
+
+<!-- Información técnica -->
+<div class="card">
+<h3 style="margin-bottom: 1rem;">ℹ️ Tecnología</h3>
+<p style="font-size: 0.875rem; color: #64748b;">
+Este sitio utiliza <strong>EIP-6963</strong> para descubrimiento de wallets,
+<strong>EIP-1193</strong> para conexión y <strong>SIWE</strong> para autenticación.
+Sin dependencias externas ni APIs centralizadas.
+</p>
+</div>
+</div>
 
 <script>
-/* ============================================================
-   CONFIGURACIÓN
-   ============================================================ */
+// ============================================
+// CONFIGURACIÓN
+// ============================================
 const CONFIG = {
-  chains: {
-    1: { name: 'Ethereum', explorer: 'https://etherscan.io' },
-    5: { name: 'Goerli', explorer: 'https://goerli.etherscan.io' },
-    137: { name: 'Polygon', explorer: 'https://polygonscan.com' },
-    80001: { name: 'Mumbai', explorer: 'https://mumbai.polygonscan.com' },
-    42161: { name: 'Arbitrum', explorer: 'https://arbiscan.io' },
-    10: { name: 'Optimism', explorer: 'https://optimistic.etherscan.io' },
-    56: { name: 'BNB Chain', explorer: 'https://bscscan.com' }
-  },
-  priceApi: 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
-  domain: location.hostname
+	// Nombre de tu dApp (usado en SIWE)
+	appName: 'Mi Web3 App',
+	// Chain principal que soportes (1 = Ethereum Mainnet)
+	supportedChains: [1, 137, 56, 43114],
+	// Nombres legibles de redes
+	networkNames: {
+		1: 'Ethereum Mainnet',
+		137: 'Polygon',
+		56: 'BNB Smart Chain',
+		43114: 'Avalanche',
+		11155111: 'Sepolia Testnet'
+	},
+	// Iconos por defecto (puedes usar URLs reales)
+	defaultIcon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyNCIgZmlsbD0iIzZkNGFmZiIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMjQiIHI9IjEyIiBmaWxsPSIjZmZmIi8+PC9zdmc+'
 };
 
-/* ============================================================
-   ESTADO GLOBAL
-   ============================================================ */
+// ============================================
+// ESTADO GLOBAL
+// ============================================
 const state = {
-  provider: null,
-  accounts: [],
-  chainId: null,
-  walletName: null,
-  signer: null,
-  web3: null
+	isConnected: false,
+	address: null,
+	chainId: null,
+	provider: null,
+	discoveredProviders: [],
+	selectedProviderDetail: null
 };
 
-/* ============================================================
-   DEEP LINKS PARA CADA WALLET
-   ⚠️ Estos formatos pueden cambiar - verifique documentación
-   ============================================================ */
-const DEEP_LINKS = {
-  metamask: {
-    name: 'MetaMask',
-    icon: '🦊',
-    scheme: 'https://metamask.app.link/dapp/{full}',
-    installedCheck: () => typeof window.metamask !== 'undefined'
-  },
-  trustwallet: {
-    name: 'TrustWallet',
-    icon: '🛡️',
-    scheme: 'https://link.trustwallet.com/open_url?coin_id=60&url={full}',
-    installedCheck: () => window.location.href.startsWith('https://link.trustwallet.com') === false && 
-                         window.ethereum?.isTrust === true
-  },
-  coinbase: {
-    name: 'Coinbase Wallet',
-    icon: '💎',
-    scheme: 'https://go.cb-w.com/dapp?cb_url={full}',
-    installedCheck: () => typeof window.coinbaseWalletExtension !== 'undefined'
-  },
-  rainbow: {
-    name: 'Rainbow',
-    icon: '🌈',
-    scheme: 'https://rnbwapp.com/?uri={full}',
-    installedCheck: () => window.ethereum?.isRainbow === true
-  },
-  argent: {
-    name: 'Argent',
-    icon: '⚡',
-    scheme: 'https://www.argent.xyz/argent-dapp?url={full}',
-    installedCheck: () => window.ethereum?.isArgent === true
-  },
-  imtoken: {
-    name: 'imToken',
-    icon: '📱',
-    scheme: 'imtoken://dapp?link={full}',
-    installedCheck: () => window.ethereum?.isImToken === true
-  },
-  zerion: {
-    name: 'Zerion',
-    icon: '🎯',
-    scheme: 'https://app.zerion.io/dapp?url={full}',
-    installedCheck: () => window.ethereum?.isZerion === true
-  }
+// ============================================
+// UTILIDADES
+// ============================================
+const utils = {
+	// Formatear dirección: 0x1234...5678
+	truncateAddress: (addr) => {
+		if (!addr) return '';
+		return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+	},
+	
+	// Convertir hex a decimal
+	hexToDecimal: (hex) => {
+		return parseInt(hex, 16);
+	},
+	
+	// Mostrar error
+	showError: (message) => {
+		const el = document.getElementById('errorMessage');
+		el.textContent = message;
+		el.style.display = 'block';
+		setTimeout(() => { el.style.display = 'none'; }, 5000);
+	},
+	
+	// Guardar sesión
+	saveSession: (data) => {
+		try {
+			localStorage.setItem('web3_session', JSON.stringify(data));
+		} catch (e) {
+			console.warn('No se pudo guardar sesión:', e);
+		}
+	},
+	
+	// Restaurar sesión
+	restoreSession: () => {
+		try {
+			const data = localStorage.getItem('web3_session');
+			return data ? JSON.parse(data) : null;
+		} catch (e) {
+			return null;
+		}
+	}
 };
 
-/* ============================================================
-   UTILIDADES
-   ============================================================ */
-function getFullUrl() {
-  return encodeURIComponent(location.href);
-}
-
-function truncateAddress(addr) {
-  if (!addr) return '';
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-}
-
-function showToast(message, type = 'info') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = `toast show ${type}`;
-  setTimeout(() => toast.classList.remove('show'), 4000);
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-/* ============================================================
-   DETECCIÓN EIP-6963 (Multi-Wallet Discovery)
-   ============================================================ */
-async function discoverProviders() {
-  const providers = new Map();
-
-  // Listener para anuncios EIP-6963
-  window.addEventListener('eip6963:announceProvider', (event) => {
-    const { info, provider } = event.detail;
-    if (!providers.has(info.uuid)) {
-      providers.set(info.uuid, { info, provider });
-      renderWalletButtons();
-    }
-  });
-
-  // Solicitar anuncios
-  const announce = () => window.dispatchEvent(new Event('eip6963:requestProvider'));
-  announce();
-  setTimeout(announce, 300);
-  setTimeout(announce, 1000);
-
-  return providers;
-}
-
-/* ============================================================
-   RENDERIZADO DE BOTONES
-   ============================================================ */
-async function renderWalletButtons() {
-  const list = document.getElementById('walletList');
-  list.innerHTML = '';
-
-  // 1. Extensiones detectadas (EIP-6963 y legacy)
-  const detected = await getDetectedProviders();
-  
-  detected.forEach(({ name, icon, provider, isInstalled }) => {
-    const btn = document.createElement('button');
-    btn.className = 'wallet-btn';
-    btn.innerHTML = `
-      <span class="wallet-icon">${icon}</span>
-      <span class="wallet-info">
-        <span class="wallet-name">${escapeHtml(name)}</span>
-        <span class="wallet-desc">${isInstalled ? 'Detectada en este dispositivo' : 'Abrir en app'}</span>
-      </span>
-      ${isInstalled ? '<span class="wallet-status">✓ Instalado</span>' : '<span class="wallet-status not-installed">→ Abrir</span>'}
-    `;
-    btn.onclick = () => connectToWallet(provider || name);
-    list.appendChild(btn);
-  });
-
-  // 2. Botones para abrir en app móvil (si no detectamos extensiones o estamos en móvil)
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const mobileOnly = detected.length === 0 || isMobile;
-
-  if (mobileOnly) {
-    Object.entries(DEEP_LINKS).forEach(([key, wallet]) => {
-      const btn = document.createElement('a');
-      btn.className = 'wallet-btn';
-      btn.href = wallet.scheme.replace('{full}', getFullUrl());
-      btn.rel = 'noopener';
-      
-      // Intentar detectar si está instalado
-      const isInstalled = wallet.installedCheck?.() || false;
-      
-      btn.innerHTML = `
-        <span class="wallet-icon">${wallet.icon}</span>
-        <span class="wallet-info">
-          <span class="wallet-name">${escapeHtml(wallet.name)}</span>
-          <span class="wallet-desc">${isInstalled ? 'Detectada' : 'Abrir en app'}</span>
-        </span>
-        ${isInstalled ? '<span class="wallet-status">✓ Disponible</span>' : '<span class="wallet-status not-installed">↘ Descargar</span>'}
-      `;
-      list.appendChild(btn);
-    });
-  }
-}
-
-/* ============================================================
-   OBTENER PROVIDERS DETECTADOS
-   ============================================================ */
-async function getDetectedProviders() {
-  const providers = [];
-  
-  // EIP-6963
-  const announcementEvent = new Event('eip6963:requestProvider');
-  window.dispatchEvent(announcementEvent);
-  
-  // Legacy window.ethereum
-  if (window.ethereum) {
-    const eth = window.ethereum;
-    
-    // Array de providers (ej: Metamask con múltiples cuentas)
-    if (Array.isArray(eth.providers) && eth.providers.length > 0) {
-      eth.providers.forEach((provider, idx) => {
-        providers.push({
-          name: provider.isMetaMask ? 'MetaMask' : 
-                provider.isRabby ? 'Rabby' :
-                provider.isCoinbaseWallet ? 'Coinbase Wallet' :
-                provider.isBraveWallet ? 'Brave Wallet' : `Wallet ${idx + 1}`,
-          icon: provider.isMetaMask ? '🦊' :
-                provider.isRabby ? '🐰' :
-                provider.isCoinbaseWallet ? '💎' :
-                provider.isBraveWallet ? '🦁' : '🔌',
-          provider,
-          isInstalled: true
-        });
-      });
-    } else {
-      // Single provider
-      const name = eth.isMetaMask ? 'MetaMask' :
-                   eth.isRabby ? 'Rabby' :
-                   eth.isCoinbaseWallet ? 'Coinbase Wallet' :
-                   eth.isBraveWallet ? 'Brave Wallet' :
-                   eth.isTrust ? 'TrustWallet' :
-                   eth.isRainbow ? 'Rainbow' :
-                   eth.isArgent ? 'Argent' : 'Wallet';
-      const icon = eth.isMetaMask ? '🦊' :
-                   eth.isRabby ? '🐰' :
-                   eth.isCoinbaseWallet ? '💎' :
-                   eth.isBraveWallet ? '🦁' :
-                   eth.isTrust ? '🛡️' :
-                   eth.isRainbow ? '🌈' :
-                   eth.isArgent ? '⚡' : '🔌';
-      
-      providers.push({ name, icon, provider, isInstalled: true });
-    }
-  }
-
-  // Eliminar duplicados
-  const unique = [];
-  const seen = new Set();
-  providers.forEach(p => {
-    if (!seen.has(p.name)) {
-      seen.add(p.name);
-      unique.push(p);
-    }
-  });
-
-  return unique;
-}
-
-/* ============================================================
-   CONEXIÓN A WALLET
-   ============================================================ */
-async function connectToWallet(providerOrName) {
-  try {
-    let provider;
-    let walletName;
-
-    if (typeof providerOrName === 'object') {
-      provider = providerOrName;
-      walletName = provider.isMetaMask ? 'MetaMask' : 
-                   provider.isRabby ? 'Rabby' :
-                   provider.isCoinbaseWallet ? 'Coinbase Wallet' :
-                   provider.isTrust ? 'TrustWallet' :
-                   provider.isRainbow ? 'Rainbow' : 'Wallet';
-    } else {
-      // Es el nombre del deep link
-      const link = DEEP_LINKS[providerOrName.toLowerCase()] || 
-                   Object.values(DEEP_LINKS).find(w => w.name === providerOrName);
-      
-      if (!link) {
-        showToast('Wallet no encontrada', 'error');
-        return;
-      }
-
-      // Abrir en app móvil
-      const url = link.scheme.replace('{full}', getFullUrl());
-      window.location.href = url;
-      showToast(`Abriendo ${link.name}...`, 'info');
-      return;
-    }
-
-    // Pedir cuentas
-    const accounts = await provider.request({ method: 'eth_requestAccounts' });
-    
-    if (!accounts || accounts.length === 0) {
-      throw new Error('No se seleccionó ninguna cuenta');
-    }
-
-    // Guardar estado
-    state.provider = provider;
-    state.accounts = accounts;
-    state.walletName = walletName;
-    state.web3 = new ethers.providers.Web3Provider(provider);
-    state.signer = state.web3.getSigner();
-
-    // Obtener chainId
-    state.chainId = await provider.request({ method: 'eth_chainId' });
-
-    // Actualizar UI
-    updateConnectedUI(accounts[0]);
-
-    // Setup listeners
-    provider.on?.('accountsChanged', handleAccountsChanged);
-    provider.on?.('chainChanged', handleChainChanged);
-    provider.on?.('disconnect', handleDisconnect);
-
-    // Guardar en localStorage
-    saveConnectionState();
-
-    showToast(`${walletName} conectado`, 'success');
-
-  } catch (error) {
-    console.error('Error conectando:', error);
-    showToast('Error: ' + error.message, 'error');
-  }
-}
-
-/* ============================================================
-   ACTUALIZAR UI CONECTADA
-   ============================================================ */
-async function updateConnectedUI(address) {
-  const panel = document.getElementById('connectedPanel');
-  const selectPanel = document.getElementById('selectPanel');
-  const qrPanel = document.getElementById('qrPanel');
-  const badge = document.getElementById('statusBadge');
-  const disconnectPanel = document.getElementById('disconnectPanel');
-
-  panel.classList.add('active');
-  selectPanel.classList.add('hidden');
-  qrPanel.classList.add('hidden');
-  disconnectPanel.classList.remove('hidden');
-
-  badge.textContent = 'Conectado';
-  badge.style.background = 'rgba(0, 255, 157, 0.15)';
-  badge.style.color = '#00ff9d';
-
-  // Mostrar dirección
-  document.getElementById('displayAddress').textContent = address;
-  document.getElementById('addressDisplay').textContent = address;
-  document.getElementById('walletNameDisplay').textContent = state.walletName;
-
-  // Actualizar red
-  updateNetworkInfo();
-
-  // Actualizar balance
-  await updateBalance();
-
-  // Persistir
-  localStorage.setItem('lastConnectedAccount', address);
-  localStorage.setItem('lastConnectedWallet', state.walletName);
-}
-
-/* ============================================================
-   ACTUALIZAR INFORMACIÓN DE RED
-   ============================================================ */
-function updateNetworkInfo() {
-  const chain = CONFIG.chains[parseInt(state.chainId)];
-  const tag = document.getElementById('networkTag');
-  
-  if (chain) {
-    tag.textContent = `${chain.name} (${parseInt(state.chainId)})`;
-  } else {
-    tag.textContent = `Red ${state.chainId}`;
-  }
-}
-
-/* ============================================================
-   ACTUALIZAR SALDO
-   ============================================================ */
-async function updateBalance() {
-  try {
-    const balanceWei = await state.signer.getBalance();
-    const balanceEth = parseFloat(ethers.utils.formatEther(balanceWei));
-    
-    document.getElementById('balanceDisplay').textContent = 
-      balanceEth.toFixed(4) + ' ETH';
-
-    // Obtener precio USD
-    fetch(CONFIG.priceApi)
-      .then(res => res.json())
-      .then(data => {
-        const usd = (balanceEth * data.ethereum.usd).toFixed(2);
-        document.getElementById('ethUsd').textContent = `≈ $${usd} USD`;
-      })
-      .catch(() => {
-        document.getElementById('ethUsd').textContent = '';
-      });
-  } catch (error) {
-    console.error('Error obteniendo saldo:', error);
-  }
-}
-
-/* ============================================================
-   EVENT HANDLERS
-   ============================================================ */
-async function handleAccountsChanged(accounts) {
-  if (accounts.length === 0) {
-    disconnect();
-  } else if (accounts[0] !== state.accounts[0]) {
-    state.accounts = accounts;
-    updateConnectedUI(accounts[0]);
-    showToast('Cuenta cambiada', 'success');
-  }
-}
-
-function handleChainChanged(chainId) {
-  window.location.reload();
-}
-
-function handleDisconnect(code, reason) {
-  disconnect();
-  showToast('Wallet desconectada', 'info');
-}
-
-/* ============================================================
-   ACCIONES DE USUARIO
-   ============================================================ */
-function disconnect() {
-  state.provider = null;
-  state.accounts = [];
-  state.chainId = null;
-  state.walletName = null;
-  state.signer = null;
-  state.web3 = null;
-
-  // Reset UI
-  document.getElementById('connectedPanel').classList.remove('active');
-  document.getElementById('selectPanel').classList.remove('hidden');
-  document.getElementById('qrPanel').classList.remove('hidden');
-  document.getElementById('disconnectPanel').classList.add('hidden');
-
-  const badge = document.getElementById('statusBadge');
-  badge.textContent = 'Desconectado';
-  badge.style.background = 'rgba(0, 255, 157, 0.1)';
-  badge.style.color = '#00ff9d';
-
-  // Limpiar localStorage
-  localStorage.removeItem('lastConnectedAccount');
-  localStorage.removeItem('lastConnectedWallet');
-  localStorage.removeItem('lastConnectedChainId');
-
-  showToast('Desconectado', 'info');
-}
-
-async function copyAddress() {
-  if (!state.accounts[0]) return;
-  await navigator.clipboard.writeText(state.accounts[0]);
-  showToast('Dirección copiada', 'success');
-}
-
-function viewExplorer() {
-  if (!state.accounts[0] || !state.chainId) return;
-  const chain = CONFIG.chains[parseInt(state.chainId)];
-  if (chain) {
-    window.open(`${chain.explorer}/address/${state.accounts[0]}`, '_blank');
-  }
-}
-
-async function signMessage() {
-  if (!state.signer) {
-    showToast('Conecta una wallet primero', 'error');
-    return;
-  }
-
-  // Mensaje legible para el usuario (EIP-191)
-  const message = `Firma para verificar tu identidad
-
-Sitio: ${location.hostname}
-Dirección: ${state.accounts[0]}
-Tiempo: ${new Date().toISOString()}
-
-Esta firma no realiza ninguna transacción ni gastará fondos.`;
-
-  try {
-    const signature = await state.signer.signMessage(message);
-    showToast('✅ Mensaje firmado exitosamente', 'success');
-    
-    // Mostrar firma (útil para debugging)
-    console.log('Firma:', signature);
-    
-    // Aquí puedes enviar la firma a tu backend para verificar
-    // await fetch('/api/verify', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ message, signature, address: state.accounts[0] })
-    // });
-    
-  } catch (error) {
-    console.error('Error firmando:', error);
-    showToast('Error al firmar: ' + error.message, 'error');
-  }
-}
-
-async function switchNetwork() {
-  if (!state.provider) return;
-
-  const chainIds = Object.keys(CONFIG.chains).filter(id => id !== state.chainId);
-  const targetId = chainIds[0]; // Cambia a la primera red diferente
-  
-  if (!targetId) {
-    showToast('No hay otras redes disponibles', 'error');
-    return;
-  }
-
-  try {
-    await state.provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: `0x${parseInt(targetId).toString(16)}` }]
-    });
-    showToast(`Cambió a ${CONFIG.chains[targetId].name}`, 'success');
-  } catch (error) {
-    // Error 4902: cadena no agregada
-    if (error.code === 4902) {
-      showToast('Agrega esta red manualmente desde tu wallet', 'error');
-    } else {
-      showToast('Error cambiando red', 'error');
-    }
-  }
-}
-
-/* ============================================================
-   GENERAR QR CODE
-   ============================================================ */
-function generateQRCode() {
-  const container = document.getElementById('qrcode');
-  container.innerHTML = '';
-  
-  const fullUrl = location.href;
-  
-  new QRCode(container, {
-    text: fullUrl,
-    width: 200,
-    height: 200,
-    colorDark: '#000000',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-}
-
-/* ============================================================
-   RECUPERAR CONEXIÓN ANTERIOR
-   ============================================================ */
-async function restorePreviousConnection() {
-  const savedAccount = localStorage.getItem('lastConnectedAccount');
-  const savedWallet = localStorage.getItem('lastConnectedWallet');
-
-  if (!savedAccount || !window.ethereum) return;
-
-  try {
-    const accounts = await window.ethereum.request({ 
-      method: 'eth_accounts' 
-    });
-
-    if (accounts.length > 0 && accounts[0] === savedAccount) {
-      state.provider = window.ethereum;
-      state.accounts = accounts;
-      state.walletName = savedWallet;
-      state.web3 = new ethers.providers.Web3Provider(window.ethereum);
-      state.signer = state.web3.getSigner();
-      state.chainId = await window.ethereum.request({ method: 'eth_chainId' });
-
-      updateConnectedUI(savedAccount);
-      showToast(`Recuperada sesión anterior`, 'success');
-    }
-  } catch (error) {
-    console.log('Reconexión falló (usuario desautorizó):', error);
-    localStorage.clear();
-  }
-}
-
-/* ============================================================
-   INICIALIZACIÓN
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Descubrir proveedores
-  discoverProviders();
-
-  // 2. Renderizar botones iniciales
-  renderWalletButtons();
-
-  // 3. Generar QR Code
-  generateQRCode();
-
-  // 4. Intentar recuperar sesión previa
-  restorePreviousConnection();
-
-  // 5. Detectar cambios de orientación para regenerar QR
-  window.addEventListener('resize', () => {
-    if (document.getElementById('qrPanel').classList.contains('hidden') === false) {
-      generateQRCode();
-    }
-  });
-
-  console.log('🌐 Web3Connect inicializado');
-  console.log('📱 Soporta: MetaMask, TrustWallet, Coinbase, Rainbow, Argent, imToken');
-  console.log('🔗 Sin dependencias de terceros');
-});
-</script>
-</body>
-</html>
+// ============================================
+// DETECCIÓN DE ENTORNO
+// ============================================
+const environment = {
+	isMobile: () => {
+		return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+	},
+	
+	isInWalletBrowser: () => {
+		return typeof window !== 'undefined' && 
+		typeof window.ethereum !== 'undefined';
+	},
+	
+	getWalletType: () => {
+		if (typeof window === 'undefined') return 'unknown';
+		
+		const ua = navigator.userAgent.toLowerCase();
+		if (ua.includes('metamask')) return 'metamask';
+		if (ua.includes('trust wallet')) return 'trust';
+		if (ua.includes('coinbase')) return 'coinbase';
+		if (ua.includes('okx')) return 'okx';
+		if (ua.includes('brave')) return 'brave';
+		return 'other';
+	}
+};
+
+// ============================================
+// DESCUBRIMIENTO EIP-6963
+// ============================================
+const discover = {
+	init: () => {
+		console.log('🔍 Iniciando descubrimiento EIP-6963...');
+		
+		window.addEventListener('eip6963:announceProvider', (event) => {
+			const { info, provider } = event.detail;
+			
+			if (!state.discoveredProviders.some(p => p.info.uuid === info.uuid)) {
+				state.discoveredProviders.push({ info, provider });
+				ui.renderWalletOptions();
+				console.log(`✅ Wallet detectada: ${info.name}`);
+			}
+		});
+		
+		// Solicitar anuncios a todas las wallets
+		window.dispatchEvent(new Event('eip6963:requestProvider'));
+	},
+	
+	// Fallback para wallets antiguas
+	getLegacyProvider: () => {
+		if (typeof window !== 'undefined' && 
+			typeof window.ethereum !== 'undefined' &&
+			!environment.isInWalletBrowser()) {
+			return window.ethereum;
+			}
+			return null;
+	}
+};
+
+// ============================================
+// CONEXIÓN WALLET
+// ============================================
+const wallet = {
+	connect: async (providerDetail) => {
+		try {
+			ui.setLoading(true);
+			
+			let provider;
+			
+			if (providerDetail) {
+				// Usar proveedor EIP-6963
+				provider = providerDetail.provider;
+				state.selectedProviderDetail = providerDetail;
+			} else {
+				// Fallback legacy
+				provider = discover.getLegacyProvider();
+				if (!provider) {
+					throw new Error('No se detectó ninguna wallet instalada');
+				}
+			}
+			
+			// Solicitar cuentas
+			const accounts = await provider.request({
+				method: 'eth_requestAccounts'
+			});
+			
+			// Obtener chainId
+			const chainId = await provider.request({
+				method: 'eth_chainId'
+			});
+			
+			// Actualizar estado
+			state.isConnected = true;
+			state.address = accounts[0];
+			state.chainId = utils.hexToDecimal(chainId);
+			state.provider = provider;
+			
+			// Escuchar cambios de cuenta
+			provider.on('accountsChanged', wallet.handleAccountsChanged);
+			provider.on('chainChanged', wallet.handleChainChanged);
+			provider.on('disconnect', wallet.handleDisconnect);
+			
+			// Guardar sesión
+			utils.saveSession({
+				address: state.address,
+				chainId: state.chainId,
+				connectedAt: Date.now()
+			});
+			
+			// UI actualizada
+			ui.updateConnectionState(true);
+			
+			// Si hay contenido protegido, redirigir
+			console.log('✅ Conectado exitosamente');
+			
+		} catch (error) {
+			console.error('❌ Error de conexión:', error);
+			utils.showError(error.message || 'Error al conectar la wallet');
+			ui.setLoading(false);
+		}
+	},
+	
+	disconnect: () => {
+		if (state.provider && state.isConnected) {
+			// Limpiar listeners
+			state.provider.removeAllListeners();
+		}
+		
+		// Limpiar estado
+		state.isConnected = false;
+		state.address = null;
+		state.chainId = null;
+		state.provider = null;
+		state.selectedProviderDetail = null;
+		
+		// Limpiar sesión
+		localStorage.removeItem('web3_session');
+		
+		// Actualizar UI
+		ui.updateConnectionState(false);
+	},
+	
+	// Handlers de eventos
+	handleAccountsChanged: (accounts) => {
+		if (accounts.length === 0) {
+			wallet.disconnect();
+		} else if (state.address !== accounts[0]) {
+			state.address = accounts[0];
+			utils.saveSession({
+				address: state.address,
+				chainId: state.chainId,
+				connectedAt: Date.now()
+			});
+			ui.updateConnectionState(true);
+		}
+	},
+	
+	handleChainChanged: (newChainId) => {
+		state.chainId = utils.hexToDecimal(newChainId);
+		utils.saveSession({
+			address: state.address,
+			chainId: state.chainId,
+			connectedAt: Date.now()
+		});
+		ui.updateConnectionState(true);
+		utils.showError('Red cambiada. Recarga para actualizar.');
+	},
+	
+	handleDisconnect: () => {
+		console.log('🔴 Wallet desconectada externamente');
+		wallet.disconnect();
+		utils.showError('La wallet se ha desconectado');
+	},
+	
+	// Verificación SIWE básica
+	signInWithEtherum: async (message) => {
+		if (!state.isConnected) {
+			throw new Error('No hay wallet conectada');
+		}
+		
+		const signature = await state.provider.request({
+			method: 'personal_sign',
+			params: [message, state.address]
+		});
+		
+		// En producción: verificar con ethers.verifyMessage() en backend
+		return { message, signature };
+	}
+};
+
+// ============================================
+// INTERFAZ DE USUARIO
+// ============================================
+const ui = {
+	init: () => {
+		// Event listeners
+		document.getElementById('disconnectBtn').addEventListener('click', wallet.disconnect);
+		
+		// Restaurar sesión si existe
+		const session = utils.restoreSession();
+		if (session && session.address) {
+			// Intentar reconectar (necesitamos provider activo)
+			console.log('🔄 Sesión previa encontrada:', session);
+		}
+		
+		// Iniciar descubrimiento
+		discover.init();
+		
+		// Detectar ambiente móvil
+		if (environment.isMobile()) {
+			document.getElementById('mobileCTA').classList.remove('hidden');
+			
+			// Configurar deep link
+			const currentUrl = encodeURIComponent(window.location.href);
+			const metaMaskLink = `https://metamask.app.link/dapp/${currentUrl}`;
+			document.getElementById('openInWallet').href = metaMaskLink;
+		}
+		
+		// Si ya estamos dentro de una wallet browser
+		if (environment.isInWalletBrowser() && !document.getElementById('mobileCTA').classList.contains('hidden')) {
+			document.getElementById('mobileCTA').classList.add('hidden');
+		}
+	},
+	
+	renderWalletOptions: () => {
+		const container = document.getElementById('walletList');
+		container.innerHTML = '';
+		
+		// Agregar fallback legacy
+		const legacyProvider = discover.getLegacyProvider();
+		let providersToRender = [...state.discoveredProviders];
+		
+		if (legacyProvider && !providersToRender.some(p => p.provider === legacyProvider)) {
+			providersToRender.push({
+				info: {
+					uuid: 'legacy-provider',
+					name: 'Wallet Detectada',
+					icon: CONFIG.defaultIcon,
+					rdns: 'legacy'
+				},
+				provider: legacyProvider
+			});
+		}
+		
+		if (providersToRender.length === 0) {
+			container.innerHTML = `
+			<div style="text-align: center; padding: 2rem; color: #64748b;">
+			<p>⏳ Esperando wallets...</p>
+			<small style="display: block; margin-top: 0.5rem;">
+			Instala MetaMask, Trust Wallet u otra wallet EVM
+			</small>
+			</div>
+			`;
+			return;
+		}
+		
+		providersToRender.forEach((detail, index) => {
+			const option = document.createElement('div');
+			option.className = 'wallet-option';
+		option.dataset.index = index;
+		option.innerHTML = `
+		<img src="${detail.info.icon || CONFIG.defaultIcon}" 
+		alt="${detail.info.name}" 
+		class="wallet-icon"
+		onerror="this.src='${CONFIG.defaultIcon}'">
+		<div class="wallet-info">
+		<div class="wallet-name">${detail.info.name}</div>
+		<div class="wallet-platform">${ui.getPlatformLabel(detail.info.rdns)}</div>
+		</div>
+		`;
+		
+		option.addEventListener('click', () => {
+			// Remover selección previa
+			document.querySelectorAll('.wallet-option').forEach(el => {
+				el.classList.remove('selected');
+			});
+			option.classList.add('selected');
+			
+			// Conectar
+			wallet.connect(detail);
+		});
+		
+		container.appendChild(option);
+		});
+	},
+	
+	getPlatformLabel: (rdns) => {
+		const labels = {
+			'io.metamask': 'Extensión Chrome/Firefox',
+			'com.trustwallet.app': 'Móvil + Extensión',
+			'org.coinbase.wallet': 'Móvil + Extensión',
+			'xyz.unstoppable.wallet': 'Multi-plataforma',
+			'legacy': 'Inyectado en navegador'
+		};
+		return labels[rdns] || 'Wallet Web3';
+	},
+	
+	updateConnectionState: (connected) => {
+		const badge = document.getElementById('connectionBadge');
+		const info = document.getElementById('walletInfo');
+		const disconnectBtn = document.getElementById('disconnectBtn');
+		
+		if (connected) {
+			badge.className = 'status-badge status-connected';
+			badge.textContent = 'Conectado ✓';
+			info.classList.remove('hidden');
+			disconnectBtn.classList.remove('hidden');
+			
+			document.getElementById('walletAddress').textContent = 
+			utils.truncateAddress(state.address);
+			document.getElementById('chainId').textContent = 
+			state.chainId.toString();
+			document.getElementById('networkName').textContent = 
+			CONFIG.networkNames[state.chainId] || `Chain ${state.chainId}`;
+		} else {
+			badge.className = 'status-badge status-disconnected';
+			badge.textContent = 'Desconectado';
+			info.classList.add('hidden');
+			disconnectBtn.classList.add('hidden');
+		}
+	},
+	
+	setLoading: (loading) => {
+		const btns = document.querySelectorAll('.wallet-option, #connectBtn');
+		btns.forEach(btn => {
+			if (loading) {
+				btn.disabled = true;
+				btn.style.opacity = '0.6';
+			} else {
+				btn.disabled = false;
+				btn.style.opacity = '1';
+			}
+		});
+	}
+};
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', ui.init);
+
+// Debug mode
+if (window.location.hostname === 'localhost' || 
+	window.location.hostname === '127.0.0.1') {
+	console.log('%c🟣 Web3 Connector - Modo Desarrollo', 'color: #6d4aff; font-size: 16px; font-weight: bold;');
+console.log('Estado inicial:', state);
+	}
+	</script>
+	</body>
+	</html>
